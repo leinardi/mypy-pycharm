@@ -17,7 +17,7 @@ helps enforcing a coding standard and sniffs for some code smells
 
 The plugin requires [mypy](https://github.com/PyCQA/mypy) to be installed.
 
-1. Download the latest [Mypy-x.x.x.zip](https://github.com/leinardi/mypy-pycharm/releases)
+1. Download the latest [mypy-plugin-0.7.0.zip](https://github.com/leinardi/mypy-pycharm/releases)
 2. In PyCharm go to Settings... -> Plugins -> Install plugins from disc
    -> Select downloaded file -> Restart PyCharm when prompted.
 
@@ -53,7 +53,7 @@ by going to Settings... -> Editor -> Inspections -> Mypy -> Severity:
 _If I have seen further it is by standing on the sholders of Giants - Isaac Newton_
 
 A huge thank you to the project [CheckStyle-IDEA](https://github.com/jshiell/checkstyle-idea), 
-which code and architecture I have heavily used for when developing this plugin.
+which code and architecture I have heavily used when developing this plugin.
 
 ## License
 
