@@ -14,5 +14,23 @@
  * limitations under the License.
  */
 
-rootProject.name = 'mypy-pycharm'
+package com.leinardi.pycharm.mypy.util;
 
+import javax.swing.ImageIcon;
+import java.net.URL;
+
+public final class Icons {
+
+    private Icons() {
+    }
+
+    public static ImageIcon icon(final String iconPath) {
+        final URL url = Icons.class.getResource(iconPath);
+        if (url != null) {
+            return new ImageIcon(url);
+        }
+
+        return null;
+    }
+
+}

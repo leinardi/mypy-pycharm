@@ -11,5 +11,5 @@
     1. Tag version `X.Y.Z` (`git tag -s X.Y.Z && git push --tags`)
     2. Release title `X.Y.Z`
     3. Paste the content from `CHANGELOG.md` as the description
-    4. Upload the `build/distributions/Pylint-X.X.X.zip`
+    4. Upload the `build/distributions/Mypy-X.X.X.zip`
 9. Create a PR from [master](../../tree/master) to [release](../../tree/release)

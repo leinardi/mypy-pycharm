@@ -14,5 +14,12 @@
  * limitations under the License.
  */
 
-rootProject.name = 'mypy-pycharm'
+package com.leinardi.pycharm.mypy.exception;
 
+public class MypyPluginParseException extends MypyPluginException {
+    private static final long serialVersionUID = -2138216104879079892L;
+
+    public MypyPluginParseException(final String message, final Throwable cause) {
+        super(message, cause);
+    }
+}

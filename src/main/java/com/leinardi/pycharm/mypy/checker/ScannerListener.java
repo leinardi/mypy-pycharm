@@ -14,5 +14,23 @@
  * limitations under the License.
  */
 
-rootProject.name = 'mypy-pycharm'
+package com.leinardi.pycharm.mypy.checker;
 
+import com.intellij.psi.PsiFile;
+import com.leinardi.pycharm.mypy.exception.MypyPluginException;
+
+import java.util.List;
+import java.util.Map;
+
+public interface ScannerListener {
+
+    void scanStarting(List<PsiFile> filesToScan);
+
+    void filesScanned(int count);
+
+    void scanCompletedSuccessfully(
+            Map<PsiFile, List<Problem>> scanResults);
+
+    void scanFailedWithError(MypyPluginException error);
+
+}

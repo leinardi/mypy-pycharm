@@ -2,6 +2,8 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel>
+      <module name="mypy-pycharm_main" target="1.8" />
+      <module name="mypy-pycharm_test" target="1.8" />
       <module name="pylint-PyCharm-plugin_main" target="1.8" />
       <module name="pylint-PyCharm-plugin_test" target="1.8" />
       <module name="pylint-pycharm_main" target="1.8" />

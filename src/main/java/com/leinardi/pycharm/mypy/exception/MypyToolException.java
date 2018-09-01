@@ -14,5 +14,19 @@
  * limitations under the License.
  */
 
-rootProject.name = 'mypy-pycharm'
+package com.leinardi.pycharm.mypy.exception;
 
+/**
+ * Wrapper for an exception that occurred in the Mypy tool itself.
+ * <p><b>Important:</b> Be sure to throw it <em>only</em> from the 'csaccess' sourceset!</p>
+ */
+public class MypyToolException extends MypyServiceException {
+
+    public MypyToolException(String message) {
+        super(message);
+    }
+
+    public MypyToolException(String message, Throwable cause) {
+        super(message, cause);
+    }
+}

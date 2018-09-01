@@ -16,7 +16,7 @@ Put an x inside the [] like this: [x] to mark the checkbox.
 ### Step 2: Describe your environment
  - Plugin version: `?`
  - PyCharm/IDEA version: `?`
- - Pylint version: `?`
+ - Mypy version: `?`
 
 ### Step 3: Describe the problem:
 #### Steps to reproduce:

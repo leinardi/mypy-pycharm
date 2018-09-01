@@ -51,7 +51,7 @@ checkstyle {
 def hasPyCharm = project.hasProperty('pycharmPath')
 def hasPythonPlugin = project.hasProperty('pythonPlugin')
 def props = new Properties()
-rootProject.file('src/main/resources/com/leinardi/pycharm/pylint/PylintBundle.properties')
+rootProject.file('src/main/resources/com/leinardi/pycharm/mypy/MypyBundle.properties')
         .withInputStream {
     props.load(it)
 }
@@ -70,7 +70,7 @@ targetCompatibility = JavaVersion.VERSION_1_8
 
 intellij {
     version ideaVersion
-    pluginName props.getProperty('plugin.name')
+    pluginName props.getProperty('plugin.name').toLowerCase() + "-plugin"
     downloadSources Boolean.valueOf(downloadIdeaSources)
     updateSinceUntilBuild = true
     if (hasPyCharm) {
@@ -86,7 +86,7 @@ patchPluginXml {
     version project.property('version')
     sinceBuild project.property('sinceBuild')
     untilBuild project.property('untilBuild')
-    pluginDescription props.getProperty('plugin.Pylint-PyCharm.description')
+    pluginDescription props.getProperty('plugin.Mypy-PyCharm.description')
     changeNotes getChangelogHtml()
 }
 
@@ -106,7 +106,6 @@ dependencies {
     if (hasPyCharm) {
         compileOnly name: 'pycharm'
     }
-    compile 'com.squareup.moshi:moshi:1.6.0'
     errorprone 'com.google.errorprone:error_prone_core:2.3.1'
 }
 

@@ -14,5 +14,20 @@
  * limitations under the License.
  */
 
-rootProject.name = 'mypy-pycharm'
+package com.leinardi.pycharm.mypy.exception;
 
+/**
+ * An exception that originates with the Mypy access layer (aka Mypy plugin service), but is <em>not</em>
+ * a native MypyException.
+ * <p><b>Important:</b> Be sure to throw it <em>only</em> from the 'csaccess' sourceset!</p>
+ */
+public class MypyServiceException extends MypyPluginException {
+
+    public MypyServiceException(final String message) {
+        super(message);
+    }
+
+    public MypyServiceException(final String message, final Throwable cause) {
+        super(message, cause);
+    }
+}

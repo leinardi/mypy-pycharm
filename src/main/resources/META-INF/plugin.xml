@@ -15,9 +15,9 @@
   -->
 
 <idea-plugin>
-    <id>com.leinardi.pycharm.pylint</id>
-    <name>Pylint</name>
-    <vendor url="https://github.com/leinardi/pylint-pycharm">Roberto Leinardi</vendor>
+    <id>com.leinardi.pycharm.mypy</id>
+    <name>Mypy</name>
+    <vendor url="https://github.com/leinardi/mypy-pycharm">Roberto Leinardi</vendor>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
@@ -29,100 +29,94 @@
 
     <project-components>
         <component>
-            <implementation-class>com.leinardi.pycharm.pylint.PylintPlugin</implementation-class>
-            <interface-class>com.leinardi.pycharm.pylint.PylintPlugin</interface-class>
+            <implementation-class>com.leinardi.pycharm.mypy.MypyPlugin</implementation-class>
+            <interface-class>com.leinardi.pycharm.mypy.MypyPlugin</interface-class>
         </component>
     </project-components>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow id="Pylint"
+        <toolWindow id="Mypy"
                     anchor="bottom"
                     canCloseContents="false"
-                    factoryClass="com.leinardi.pycharm.pylint.toolwindow.PylintToolWindowFactory"
-                    icon="/com/leinardi/pycharm/pylint/images/pylint.png"/>
+                    factoryClass="com.leinardi.pycharm.mypy.toolwindow.MypyToolWindowFactory"
+                    icon="/com/leinardi/pycharm/mypy/images/mypy.png"/>
 
-        <projectService serviceInterface="com.leinardi.pycharm.pylint.PylintConfigService"
-                        serviceImplementation="com.leinardi.pycharm.pylint.PylintConfigService"/>
+        <projectService serviceInterface="com.leinardi.pycharm.mypy.MypyConfigService"
+                        serviceImplementation="com.leinardi.pycharm.mypy.MypyConfigService"/>
 
-        <projectConfigurable instance="com.leinardi.pycharm.pylint.PylintConfigurable"/>
+        <projectConfigurable instance="com.leinardi.pycharm.mypy.MypyConfigurable"/>
 
-        <localInspection implementationClass="com.leinardi.pycharm.pylint.PylintInspection"
-                         bundle="com.leinardi.pycharm.pylint.PylintBundle"
+        <localInspection implementationClass="com.leinardi.pycharm.mypy.MypyInspection"
+                         bundle="com.leinardi.pycharm.mypy.MypyBundle"
                          key="inspection.display-name"
                          groupKey="inspection.group"
                          level="WARNING"
                          enabledByDefault="true"/>
 
         <checkinHandlerFactory id="CheckStyleIDEACheckInHandlerFactory"
-                               implementation="com.leinardi.pycharm.pylint.handlers.ScanFilesBeforeCheckinHandlerFactory"/>
+                               implementation="com.leinardi.pycharm.mypy.handlers.ScanFilesBeforeCheckinHandlerFactory"/>
     </extensions>
 
     <actions>
 
-        <group id="PylintPluginTreeActions" text="Filter" popup="true">
-            <action id="PylintScrollToSourceAction"
-                    class="com.leinardi.pycharm.pylint.actions.ScrollToSource"
+        <group id="MypyPluginTreeActions" text="Filter" popup="true">
+            <action id="MypyScrollToSourceAction"
+                    class="com.leinardi.pycharm.mypy.actions.ScrollToSource"
                     text="Autoscroll to Source"
                     description="Auto-scroll to the source location of errors and warnings"
                     icon="/general/autoscrollToSource.png"/>
 
-            <action id="PylintExpandAllAction"
-                    class="com.leinardi.pycharm.pylint.actions.ExpandAll"
+            <action id="MypyExpandAllAction"
+                    class="com.leinardi.pycharm.mypy.actions.ExpandAll"
                     text="Expand All"
                     description="Expand all elements in the tool window"
                     icon="/actions/expandall.png"/>
 
-            <action id="PylintCollapseAllAction"
-                    class="com.leinardi.pycharm.pylint.actions.CollapseAll"
+            <action id="MypyCollapseAllAction"
+                    class="com.leinardi.pycharm.mypy.actions.CollapseAll"
                     text="Collapse All"
                     description="Collapse all elements in the tool window"
                     icon="/actions/collapseall.png"/>
 
             <separator/>
 
-            <action id="PylintDisplayErrorsAction"
-                    class="com.leinardi.pycharm.pylint.actions.DisplayErrors"
+            <action id="MypyDisplayErrorsAction"
+                    class="com.leinardi.pycharm.mypy.actions.DisplayErrors"
                     text="Display Errors"
                     description="Display error results"
                     icon="/compiler/error.png"/>
 
-            <action id="PylintDisplayWarningsAction"
-                    class="com.leinardi.pycharm.pylint.actions.DisplayWarnings"
+            <action id="MypyDisplayWarningsAction"
+                    class="com.leinardi.pycharm.mypy.actions.DisplayWarnings"
                     text="Display Warnings"
                     description="Display warning results"
                     icon="/compiler/warning.png"/>
 
-            <action id="PylintDisplayConventionAction"
-                    class="com.leinardi.pycharm.pylint.actions.DisplayConvention"
-                    text="Display Convention"
-                    description="Display Convention results"
-                    icon="/nodes/class.png"/>
-
-            <action id="PylintDisplayRefactorAction"
-                    class="com.leinardi.pycharm.pylint.actions.DisplayRefactor"
-                    text="Display Refactor"
-                    description="Display Refactor results"
-                    icon="/actions/forceRefresh.png"/>
+            <action id="MypyDisplayNoteAction"
+                    class="com.leinardi.pycharm.mypy.actions.DisplayNote"
+                    text="Display Note"
+                    description="Display Note results"
+                    icon="/compiler/information.png"/>
 
             <separator/>
 
-            <action id="PylintClearAllAction"
-                    class="com.leinardi.pycharm.pylint.actions.ClearAll"
+            <action id="MypyClearAllAction"
+                    class="com.leinardi.pycharm.mypy.actions.ClearAll"
                     text="Clear All"
                     description="Clear all elements in the tool window"
                     icon="/actions/gc.png"/>
 
         </group>
 
-        <group id="PylintPluginActions" text="Pylint" popup="true">
-            <action id="PylintCloseAction"
-                    class="com.leinardi.pycharm.pylint.actions.Close"
-                    text="Close Pylint Window"
-                    description="Close the Pylint tool window"
+        <group id="MypyPluginActions" text="Mypy" popup="true">
+            <action id="MypyCloseAction"
+                    class="com.leinardi.pycharm.mypy.actions.Close"
+                    text="Close Mypy Window"
+                    description="Close the Mypy tool window"
                     icon="/actions/cancel.png"/>
 
-            <action id="PylintStopCheck"
-                    class="com.leinardi.pycharm.pylint.actions.StopCheck"
+            <action id="MypyStopCheck"
+                    class="com.leinardi.pycharm.mypy.actions.StopCheck"
                     text="Stop the running scan"
                     description="Stop the scan currently being run"
                     icon="/actions/suspend.png">
@@ -130,49 +124,49 @@
 
             <separator/>
 
-            <action id="PylintCurrentFileAction"
-                    class="com.leinardi.pycharm.pylint.actions.ScanCurrentFile"
+            <action id="MypyCurrentFileAction"
+                    class="com.leinardi.pycharm.mypy.actions.ScanCurrentFile"
                     text="Check Current File"
-                    description="Run Pylint on the current file in the editor"
+                    description="Run Mypy on the current file in the editor"
                     icon="/actions/execute.png">
 
                 <add-to-group group-id="EditorPopupMenu" anchor="last"/>
             </action>
 
-            <action id="PylintModuleFilesAction"
-                    class="com.leinardi.pycharm.pylint.actions.ScanModule"
+            <action id="MypyModuleFilesAction"
+                    class="com.leinardi.pycharm.mypy.actions.ScanModule"
                     text="Check Module"
-                    description="Run Pylint on all files in the current module"
+                    description="Run Mypy on all files in the current module"
                     icon="/modules/modulesNode.png">
             </action>
 
-            <action id="PylintProjectFilesAction"
-                    class="com.leinardi.pycharm.pylint.actions.ScanProject"
+            <action id="MypyProjectFilesAction"
+                    class="com.leinardi.pycharm.mypy.actions.ScanProject"
                     text="Check Project"
-                    description="Run Pylint on all files in the current project"
+                    description="Run Mypy on all files in the current project"
                     icon="/general/projectTab.png">
             </action>
 
-            <action id="PylintModifiedFilesAction"
-                    class="com.leinardi.pycharm.pylint.actions.ScanModifiedFiles"
+            <action id="MypyModifiedFilesAction"
+                    class="com.leinardi.pycharm.mypy.actions.ScanModifiedFiles"
                     text="Check All Modified Files"
-                    description="Run Pylint on all modified files"
+                    description="Run Mypy on all modified files"
                     icon="/general/toolWindowChanges.png">
             </action>
 
-            <action id="PylintDefaultChangeListAction"
-                    class="com.leinardi.pycharm.pylint.actions.ScanCurrentChangeList"
+            <action id="MypyDefaultChangeListAction"
+                    class="com.leinardi.pycharm.mypy.actions.ScanCurrentChangeList"
                     text="Check Files in the Current Change List"
-                    description="Run Pylint on the current change list"
+                    description="Run Mypy on the current change list"
                     icon="/general/smallConfigurableVcs.png">
             </action>
 
             <separator/>
 
-            <action id="PylintSettingsAction"
-                    class="com.leinardi.pycharm.pylint.actions.Settings"
-                    text="Open Pylint Settings"
-                    description="Open the Pylint settings window"
+            <action id="MypySettingsAction"
+                    class="com.leinardi.pycharm.mypy.actions.Settings"
+                    text="Open Mypy Settings"
+                    description="Open the Mypy settings window"
                     icon="/general/gearPlain.png"/>
 
         </group>

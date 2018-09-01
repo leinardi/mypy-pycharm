@@ -14,5 +14,17 @@
  * limitations under the License.
  */
 
-rootProject.name = 'mypy-pycharm'
+package com.leinardi.pycharm.mypy.util;
 
+import com.intellij.openapi.fileTypes.FileType;
+import com.jetbrains.python.PythonFileType;
+
+public final class FileTypes {
+
+    private FileTypes() {
+    }
+
+    public static boolean isPython(FileType fileType) {
+        return fileType == PythonFileType.INSTANCE;
+    }
+}

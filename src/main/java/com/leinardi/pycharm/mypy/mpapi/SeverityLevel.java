@@ -14,5 +14,14 @@
  * limitations under the License.
  */
 
-rootProject.name = 'mypy-pycharm'
+package com.leinardi.pycharm.mypy.mpapi;
+
+/**
+ * Mypy violation severity levels supported by this plugin.
+ */
+public enum SeverityLevel {
+    ERROR,
+    WARNING,
+    NOTE,
+}
 

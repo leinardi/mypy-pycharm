@@ -14,5 +14,20 @@
  * limitations under the License.
  */
 
-rootProject.name = 'mypy-pycharm'
+package com.leinardi.pycharm.mypy.exception;
 
+/**
+ * Common exception thrown anywhere in this plugin.
+ */
+public class MypyPluginException extends RuntimeException {
+
+    private static final long serialVersionUID = 2L;
+
+    public MypyPluginException(final String message) {
+        super(message);
+    }
+
+    public MypyPluginException(final String message, final Throwable cause) {
+        super(message, cause);
+    }
+}
