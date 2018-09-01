@@ -15,7 +15,7 @@ helps enforcing a coding standard and sniffs for some code smells
 
 ## Installation steps
 
-The plugin requires [mypy](https://github.com/PyCQA/mypy) to be installed.
+The plugin requires [mypy](https://github.com/python/mypy) to be installed.
 
 1. Download the latest [mypy-plugin-0.7.0.zip](https://github.com/leinardi/mypy-pycharm/releases)
 2. In PyCharm go to Settings... -> Plugins -> Install plugins from disc
