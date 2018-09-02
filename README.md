@@ -17,17 +17,19 @@ helps enforcing a coding standard and sniffs for some code smells
 
 The plugin requires [mypy](https://github.com/python/mypy) to be installed.
 
-1. Download the latest [mypy-plugin-0.7.0.zip](https://github.com/leinardi/mypy-pycharm/releases)
-2. In PyCharm go to Settings... -> Plugins -> Install plugins from disc
-   -> Select downloaded file -> Restart PyCharm when prompted.
+1. In the **Settings/Preferences** dialog (<kbd>CTRL</kbd>+<kbd>Alt</kbd>+<kbd>S</kbd>), click **Plugins**. The [Plugins page](https://www.jetbrains.com/help/pycharm/plugins-settings.html) opens.
+2. Click **Browse repositories**.
+3. In the [Browse Repositories dialog](https://www.jetbrains.com/help/pycharm/browse-repositories-dialog.html) that opens, right-click on the plugin named **Mypy** and select **Download and Install**.
+4. Confirm your intention to download and install the selected plugin.
+5. Click **Close**.
+6. Click **OK** in the **Settings** dialog and restart PyCharm for the changes to take effect.
 
 ## Configuration
 
 The only configuration needed is to set the path to Mypy executable, and only if is not already
 inside the PATH environment variable.
 
-To reach the Plugin configuration screen you can go to Settings... -> Other Settings -> Mypy
-or simply click the gear icon from the side bar of the Mypy tool window.
+To reach the Plugin configuration screen you can open **Settings/Preferences** dialog (<kbd>CTRL</kbd>+<kbd>Alt</kbd>+<kbd>S</kbd>), click **Other Settings**  and then **Mypy** or simply click the gear icon from the side bar of the Mypy tool window.
 
 To change the path to your Mypy executable you can either type the path directly or use 
 the Browse button to open a file selection dialog.
@@ -40,7 +42,7 @@ the executable.
 ### Inspection severity
 
 By default, Mypy message severity is set to Warning. It is possible to change the severity level
-by going to Settings... -> Editor -> Inspections -> Mypy -> Severity:
+by going to **Settings/Preferences** dialog (<kbd>CTRL</kbd>+<kbd>Alt</kbd>+<kbd>S</kbd>) -> **Editor** -> **Inspections** -> **Mypy** -> **Severity**:
 
 ![plugin inspection severity screenshot](https://github.com/leinardi/mypy-pycharm/blob/master/art/mypy-inspection-severity.png)
 
@@ -64,7 +66,14 @@ More info [here](https://www.jetbrains.com/help/pycharm/configuring-folders-with
 
 This plugin officially supports only PyCharm, but it should work also on IntelliJ IDEA
 if you have the [Python Community Edition](https://plugins.jetbrains.com/plugin/7322-python-community-edition)
-plugin installed. If it does not work, feel free to report an bug on the issue tracker.
+plugin installed. If it does not work, feel free to open a bug on the [issue tracker](https://github.com/leinardi/mypy-pycharm/issues).
+
+### I like this plugin, how can I support it?
+
+The best way to support this plugin is to rate it on the [JetBrains Plugin Repository page](https://plugins.jetbrains.com/plugin/11086-mypy) and to star this project on GitHub.
+Feedback is always welcome: if you found a bug or would like to suggest a feature,
+feel free to open an issue on the [issue tracker](https://github.com/leinardi/mypy-pycharm/issues). If your feedback doesn't fall in the previous categories,
+you can always leave a comment on the [Plugin Repository page](https://plugins.jetbrains.com/plugin/11086-mypy).
 
 ## Acknowledgements
 _If I have seen further it is by standing on the sholders of Giants - Isaac Newton_
