@@ -49,6 +49,23 @@ by going to Settings... -> Editor -> Inspections -> Mypy -> Severity:
 ![plugin actions screenshot](https://github.com/leinardi/mypy-pycharm/blob/master/art/actions1.png)
 ![plugin actions screenshot](https://github.com/leinardi/mypy-pycharm/blob/master/art/actions2.png)
 
+## FAQ
+### How can I prevent the code inspection to run on a specific folder?
+
+The easiest way to ignore a specific folder is to mark it as Excluded from PyCharm/IDEA:
+
+1. Open PyCharm/IDEA Settings -> *your project* -> Project structure
+2. Select the directory you want to exclude
+3. Click the Excluded button (red folder icon)
+
+More info [here](https://www.jetbrains.com/help/pycharm/configuring-folders-within-a-content-root.html#mark). 
+
+### The name of the plugin is `mypy-pycharm`, can I use it also with IntelliJ IDEA?
+
+This plugin officially supports only PyCharm, but it should work also on IntelliJ IDEA
+if you have the [Python Community Edition](https://plugins.jetbrains.com/plugin/7322-python-community-edition)
+plugin installed. If it does not work, feel free to report an bug on the issue tracker.
+
 ## Acknowledgements
 _If I have seen further it is by standing on the sholders of Giants - Isaac Newton_
 
