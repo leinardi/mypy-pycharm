@@ -52,6 +52,9 @@ by going to **Settings/Preferences** dialog (<kbd>CTRL</kbd>+<kbd>Alt</kbd>+<kbd
 ![plugin actions screenshot](https://github.com/leinardi/mypy-pycharm/blob/master/art/actions2.png)
 
 ## FAQ
+### When I click "Check Project/Module/Changes" I only get one error for one file, why?
+It is a [know issue](https://github.com/python/mypy/issues/3850) of `mypy`: if the validation encounters a blocking error it just bails out completely ignoring the rest of the files. The biggest problem for the plugin is that currently there is no way to know if the check ended normally or because it encountered a blocking error (in the issue ticket there was a suggestion of using `--verbose` but it does not work, for exampble, for `duplicate module naned` errors).
+
 ### How can I prevent the code inspection to run on a specific folder?
 
 The easiest way to ignore a specific folder is to mark it as Excluded from PyCharm/IDEA:
