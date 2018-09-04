@@ -26,6 +26,7 @@ import com.leinardi.pycharm.mypy.MypyConfigService;
 import com.leinardi.pycharm.mypy.exception.MypyPluginException;
 import com.leinardi.pycharm.mypy.exception.MypyPluginParseException;
 import com.leinardi.pycharm.mypy.exception.MypyToolException;
+import com.leinardi.pycharm.mypy.util.Notifications;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -51,7 +52,8 @@ public class MypyRunner {
     private MypyRunner() {
     }
 
-    public static boolean isPathToMypyValid(String pathToMypy, boolean daemon) {
+    public static boolean isPathToMypyValid(String pathToMypy) {
+        boolean daemon = false;
         if (pathToMypy.startsWith(File.separator)) {
             VirtualFile mypyFile = LocalFileSystem.getInstance().findFileByPath(pathToMypy);
             if (mypyFile == null || !mypyFile.exists()) {
@@ -74,8 +76,20 @@ public class MypyRunner {
         }
     }
 
+    public static boolean isMypyAvailable(Project project) {
+        MypyConfigService mypyConfigService = MypyConfigService.getInstance(project);
+        if (mypyConfigService == null) {
+            throw new IllegalStateException("MypyConfigService is null");
+        }
+        return isPathToMypyValid(mypyConfigService.getPathToMypy());
+    }
+
     public static List<Issue> scan(Project project, Set<String> filesToScan)
             throws InterruptedIOException, InterruptedException {
+        if (!isMypyAvailable(project)) {
+            Notifications.showMypyNotAvailable(project);
+            return Collections.emptyList();
+        }
         MypyConfigService mypyConfigService = MypyConfigService.getInstance(project);
         if (filesToScan.isEmpty()) {
             throw new MypyPluginException("Illegal state: filesToScan is empty");

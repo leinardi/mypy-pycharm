@@ -16,8 +16,13 @@
 
 package com.leinardi.pycharm.mypy.util;
 
+import com.intellij.ide.BrowserUtil;
 import com.intellij.notification.NotificationGroup;
+import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
+import com.leinardi.pycharm.mypy.MypyBundle;
+import com.leinardi.pycharm.mypy.actions.Settings;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.PrintWriter;
@@ -83,6 +88,19 @@ public final class Notifications {
                 .notify(project);
     }
 
+    public static void showMypyNotAvailable(final Project project) {
+        BALLOON_GROUP
+                .createNotification(
+                        TITLE,
+                        MypyBundle.message("plugin.notification.mypy-not-found.subtitle"),
+                        MypyBundle.message("plugin.notification.mypy-not-found.content"),
+                        ERROR,
+                        URL_OPENING_LISTENER)
+                .addAction(new OpenInstallMypyDocsAction())
+                .addAction(new OpenPluginSettingsAction())
+                .notify(project);
+    }
+
     @NotNull
     private static String messageFor(final Throwable t) {
         if (t.getCause() != null) {
@@ -98,6 +116,30 @@ public final class Notifications {
         return t.getMessage() + "<br>" + sw.toString()
                 .replaceAll("\t", "&nbsp;&nbsp;")
                 .replaceAll("\n", "<br>");
+    }
+
+    private static class OpenInstallMypyDocsAction extends AnAction {
+
+        OpenInstallMypyDocsAction() {
+            super(MypyBundle.message("plugin.notification.action.how-to-install-mypy"));
+        }
+
+        @Override
+        public void actionPerformed(AnActionEvent e) {
+            BrowserUtil.browse(MypyBundle.message("mypy.docs.installing-mypy.url"));
+        }
+    }
+
+    private static class OpenPluginSettingsAction extends AnAction {
+
+        OpenPluginSettingsAction() {
+            super(MypyBundle.message("plugin.notification.action.plugin-settings"));
+        }
+
+        @Override
+        public void actionPerformed(AnActionEvent e) {
+            new Settings().actionPerformed(e);
+        }
     }
 
 }

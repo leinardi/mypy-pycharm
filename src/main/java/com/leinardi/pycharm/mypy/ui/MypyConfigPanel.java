@@ -143,7 +143,7 @@ public class MypyConfigPanel {
         @Override
         public void actionPerformed(final ActionEvent e) {
             String pathToMypy = getPathToMypy();
-            if (MypyRunner.isPathToMypyValid(pathToMypy, false)) {
+            if (MypyRunner.isPathToMypyValid(pathToMypy)) {
                 testButton.setIcon(Icons.icon("/general/inspectionsOK.png"));
                 Notifications.showInfo(
                         project,

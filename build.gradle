@@ -70,7 +70,7 @@ targetCompatibility = JavaVersion.VERSION_1_8
 
 intellij {
     version ideaVersion
-    pluginName props.getProperty('plugin.name').toLowerCase() + "-plugin"
+    pluginName props.getProperty('plugin.name').toLowerCase().replace(' ', '-')
     downloadSources Boolean.valueOf(downloadIdeaSources)
     updateSinceUntilBuild = true
     if (hasPyCharm) {

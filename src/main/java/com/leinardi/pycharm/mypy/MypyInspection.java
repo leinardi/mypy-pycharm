@@ -27,6 +27,7 @@ import com.leinardi.pycharm.mypy.checker.Problem;
 import com.leinardi.pycharm.mypy.checker.ScanFiles;
 import com.leinardi.pycharm.mypy.checker.ScannableFile;
 import com.leinardi.pycharm.mypy.exception.MypyPluginParseException;
+import com.leinardi.pycharm.mypy.mpapi.MypyRunner;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -70,6 +71,11 @@ public class MypyInspection extends LocalInspectionTool {
         LOG.debug("Inspection has been invoked.");
 
         final MypyPlugin plugin = plugin(manager.getProject());
+
+        if (!MypyRunner.isMypyAvailable(plugin.getProject())) {
+            LOG.debug("Scan failed: Mypy not available.");
+            return NO_PROBLEMS_FOUND;
+        }
 
         final List<ScannableFile> scannableFiles = new ArrayList<>();
         try {
