@@ -60,15 +60,15 @@ public class MypyRunner {
                 return false;
             }
         }
-        GeneralCommandLine generalCommandLine = new GeneralCommandLine(pathToMypy);
+        GeneralCommandLine cmd = new GeneralCommandLine(pathToMypy);
         if (daemon) {
-            generalCommandLine.addParameter("status");
+            cmd.addParameter("status");
         } else {
-            generalCommandLine.addParameter("-V");
+            cmd.addParameter("-V");
         }
         final Process process;
         try {
-            process = generalCommandLine.createProcess();
+            process = cmd.createProcess();
             process.waitFor();
             return process.exitValue() == 0;
         } catch (ExecutionException | InterruptedException e) {
@@ -129,29 +129,29 @@ public class MypyRunner {
         }
         boolean daemon = false;
 
-        GeneralCommandLine generalCommandLine = new GeneralCommandLine(pathToMypy);
-        generalCommandLine.setCharset(Charset.forName("UTF-8"));
+        GeneralCommandLine cmd = new GeneralCommandLine(pathToMypy);
+        cmd.setCharset(Charset.forName("UTF-8"));
         if (daemon) {
-            generalCommandLine.addParameter("run");
-            generalCommandLine.addParameter("--");
-            generalCommandLine.addParameter("``--show-column-numbers");
+            cmd.addParameter("run");
+            cmd.addParameter("--");
+            cmd.addParameter("``--show-column-numbers");
         } else {
-            generalCommandLine.addParameter("--show-column-numbers");
+            cmd.addParameter("--show-column-numbers");
         }
-        generalCommandLine.addParameter("--follow-imports");
-        generalCommandLine.addParameter("skip");
+        cmd.addParameter("--follow-imports");
+        cmd.addParameter("skip");
         for (String arg : args) {
             if (!StringUtil.isEmpty(arg)) {
-                generalCommandLine.addParameter(arg);
+                cmd.addParameter(arg);
             }
         }
         for (String file : filesToScan) {
-            generalCommandLine.addParameter(file);
+            cmd.addParameter(file);
         }
-        generalCommandLine.setWorkDirectory(project.getBasePath());
+        cmd.setWorkDirectory(project.getBasePath());
         final Process process;
         try {
-            process = generalCommandLine.createProcess();
+            process = cmd.createProcess();
             InputStream inputStream = process.getInputStream();
             //            process.waitFor();
             return parseMypyOutput(inputStream);
