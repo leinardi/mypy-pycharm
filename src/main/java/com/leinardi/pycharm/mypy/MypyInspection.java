@@ -48,6 +48,7 @@ public class MypyInspection extends LocalInspectionTool {
 
     private static final Logger LOG = Logger.getInstance(MypyInspection.class);
     private static final List<Problem> NO_PROBLEMS_FOUND = Collections.emptyList();
+    private static final String ERROR_MESSAGE_INVALID_SYNTAX = "invalid syntax";
 
     private MypyPlugin plugin(final Project project) {
         final MypyPlugin mypyPlugin = project.getComponent(MypyPlugin.class);
@@ -85,6 +86,8 @@ public class MypyInspection extends LocalInspectionTool {
             }
             ScanFiles scanFiles = new ScanFiles(plugin, Collections.singletonList(psiFile.getVirtualFile()));
             Map<PsiFile, List<Problem>> map = scanFiles.call();
+            map.values().forEach(problems -> problems.removeIf(problem ->
+                    problem.getMessage().equals(ERROR_MESSAGE_INVALID_SYNTAX)));
             if (map.isEmpty()) {
                 return NO_PROBLEMS_FOUND;
             }
