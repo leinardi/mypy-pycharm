@@ -26,9 +26,7 @@ import com.leinardi.pycharm.mypy.checker.ScanFiles;
 import com.leinardi.pycharm.mypy.checker.ScannerListener;
 import com.leinardi.pycharm.mypy.checker.UiFeedbackScannerListener;
 import com.leinardi.pycharm.mypy.exception.MypyPluginException;
-import com.leinardi.pycharm.mypy.mpapi.MypyRunner;
 import com.leinardi.pycharm.mypy.util.Async;
-import com.leinardi.pycharm.mypy.util.Notifications;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -99,9 +97,6 @@ public final class MypyPlugin implements ProjectComponent {
     @Override
     public void projectOpened() {
         LOG.debug("Project opened.");
-        if (!MypyRunner.isMypyAvailable(project)) {
-            Notifications.showMypyNotAvailable(project);
-        }
     }
 
     @Override

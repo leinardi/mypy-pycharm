@@ -27,22 +27,31 @@ import org.jetbrains.annotations.Nullable;
 
 @State(name = "MypyConfigService", storages = {@Storage("mypy.xml")})
 public class MypyConfigService implements PersistentStateComponent<MypyConfigService> {
-    public MypyConfigService() {
-        pathToMypy = MypyBundle.message("config.mypy.path.default");
-        mypyArguments = "";
-        scanBeforeCheckin = true;
-    }
-
-    private String pathToMypy;
+    private String customMypyPath;
+    private String mypyConfigFilePath;
     private String mypyArguments;
     private boolean scanBeforeCheckin;
 
-    public String getPathToMypy() {
-        return pathToMypy;
+    public MypyConfigService() {
+        customMypyPath = "";
+        mypyArguments = "";
+        mypyConfigFilePath = "";
     }
 
-    public void setPathToMypy(String pathToMypy) {
-        this.pathToMypy = pathToMypy;
+    public String getCustomMypyPath() {
+        return customMypyPath;
+    }
+
+    public void setCustomMypyPath(String pathToMypy) {
+        this.customMypyPath = pathToMypy;
+    }
+
+    public String getMypyConfigFilePath() {
+        return mypyConfigFilePath;
+    }
+
+    public void setMypyConfigFilePath(String pathToMypyrcFile) {
+        this.mypyConfigFilePath = pathToMypyrcFile;
     }
 
     public String getMypyArguments() {
