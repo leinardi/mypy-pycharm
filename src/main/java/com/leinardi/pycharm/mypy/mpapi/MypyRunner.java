@@ -18,15 +18,24 @@ package com.leinardi.pycharm.mypy.mpapi;
 
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.GeneralCommandLine;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.projectRoots.Sdk;
+import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.util.PathUtil;
+import com.jetbrains.python.packaging.PyPackage;
+import com.jetbrains.python.packaging.PyPackageManager;
+import com.jetbrains.python.sdk.PySdkUtil;
+import com.jetbrains.python.sdk.PythonEnvUtil;
 import com.leinardi.pycharm.mypy.MypyConfigService;
 import com.leinardi.pycharm.mypy.exception.MypyPluginException;
 import com.leinardi.pycharm.mypy.exception.MypyPluginParseException;
 import com.leinardi.pycharm.mypy.exception.MypyToolException;
 import com.leinardi.pycharm.mypy.util.Notifications;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -37,8 +46,11 @@ import java.io.InterruptedIOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -46,21 +58,27 @@ import java.util.regex.Pattern;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class MypyRunner {
+    public static final String MYPY_PACKAGE_NAME = "mypy";
+    private static final Logger LOG = com.intellij.openapi.diagnostic.Logger.getInstance(MypyRunner.class);
+    private static final String ENV_KEY_VIRTUAL_ENV = "VIRTUAL_ENV";
+    private static final String ENV_KEY_PATH = "PATH";
+    private static final String ENV_KEY_PYTHONHOME = "PYTHONHOME";
     private static final String TYPE_RE = " (error|warning|note):";
     private static final String ISSUE_RE = "([^\\s:]+):(\\d+:)?(\\d+:)?" + TYPE_RE + ".*";
 
     private MypyRunner() {
     }
 
-    public static boolean isPathToMypyValid(String pathToMypy) {
-        boolean daemon = false;
-        if (pathToMypy.startsWith(File.separator)) {
-            VirtualFile mypyFile = LocalFileSystem.getInstance().findFileByPath(pathToMypy);
-            if (mypyFile == null || !mypyFile.exists()) {
-                return false;
-            }
+    public static boolean isMypyPathValid(String mypyPath, Project project) {
+        if (!mypyPath.startsWith(File.separator)) {
+            mypyPath = project.getBasePath() + File.separator + mypyPath;
         }
-        GeneralCommandLine cmd = new GeneralCommandLine(pathToMypy);
+        VirtualFile mypyFile = LocalFileSystem.getInstance().findFileByPath(mypyPath);
+        if (mypyFile == null || !mypyFile.exists()) {
+            return false;
+        }
+        GeneralCommandLine cmd = getMypyCommandLine(project, mypyPath);
+        boolean daemon = false;
         if (daemon) {
             cmd.addParameter("status");
         } else {
@@ -76,18 +94,102 @@ public class MypyRunner {
         }
     }
 
-    public static boolean isMypyAvailable(Project project) {
+    public static String getMypyPath(Project project) {
+        return getMypyPath(project, true);
+    }
+
+    public static String getMypyPath(Project project, boolean checkConfigService) {
+        MypyConfigService mypyConfigService = MypyConfigService.getInstance(project);
+        if (checkConfigService) {
+            if (mypyConfigService == null) {
+                throw new IllegalStateException("MypyConfigService is null");
+            }
+            String mypyPath = mypyConfigService.getCustomMypyPath();
+            if (!mypyPath.isEmpty()) {
+                return mypyPath;
+            }
+        }
+        VirtualFile interpreterFile = getInterpreterFile(project);
+        if (isVenv(interpreterFile)) {
+            VirtualFile mypyFile = LocalFileSystem.getInstance()
+                    .findFileByPath(interpreterFile.getParent().getPath() + File.separator + MYPY_PACKAGE_NAME);
+            if (mypyFile != null && mypyFile.exists()) {
+                return mypyFile.getPath();
+            }
+        } else {
+            return detectSystemMypyPath();
+        }
+        return "";
+    }
+
+    public static boolean checkMypyAvailable(Project project) {
+        return checkMypyAvailable(project, false);
+    }
+
+    public static boolean checkMypyAvailable(Project project, boolean showNotifications) {
+        Sdk projectSdk = ProjectRootManager.getInstance(project).getProjectSdk();
+        if (projectSdk == null) {
+            if (showNotifications) {
+                Notifications.showNoPythonInterpreter(project);
+            }
+            return false;
+        } else if (showNotifications) {
+            PyPackageManager pyPackageManager = PyPackageManager.getInstance(projectSdk);
+            List<PyPackage> packages = pyPackageManager.getPackages();
+            if (packages != null) {
+                if (packages.stream().noneMatch(it -> MYPY_PACKAGE_NAME.equals(it.getName()))) {
+                    Notifications.showInstallMypy(project);
+                    return false;
+                }
+            }
+        }
         MypyConfigService mypyConfigService = MypyConfigService.getInstance(project);
         if (mypyConfigService == null) {
             throw new IllegalStateException("MypyConfigService is null");
         }
-        return isPathToMypyValid(mypyConfigService.getPathToMypy());
+        boolean isMypyPathValid = isMypyPathValid(getMypyPath(project), project);
+        if (showNotifications && !isMypyPathValid) {
+            Notifications.showUnableToRunMypy(project);
+        }
+        return isMypyPathValid;
+    }
+
+    private static String getMypyConfigFile(Project project, String mypyConfigFilePath) throws MypyPluginException {
+        if (mypyConfigFilePath.isEmpty()) {
+            return "";
+        } else if (!mypyConfigFilePath.startsWith(File.separator)) {
+            mypyConfigFilePath = project.getBasePath() + File.separator + mypyConfigFilePath;
+        }
+        VirtualFile mypyConfigFileFile = LocalFileSystem.getInstance().findFileByPath(mypyConfigFilePath);
+        if (mypyConfigFileFile == null || !mypyConfigFileFile.exists()) {
+            throw new MypyPluginException("mypy config file is not valid. File does not exist or can't be read.");
+        }
+        return mypyConfigFilePath;
+    }
+
+    public static String detectSystemMypyPath() {
+        GeneralCommandLine cmd = new GeneralCommandLine("which");
+        cmd.addParameter(MYPY_PACKAGE_NAME);
+        final Process process;
+        try {
+            process = cmd.createProcess();
+            Optional<String> path = new BufferedReader(
+                    new InputStreamReader(cmd.createProcess().getInputStream(), UTF_8))
+                    .lines()
+                    .findFirst();
+            process.waitFor();
+            if (process.exitValue() != 0 || !path.isPresent()) {
+                return "";
+            }
+            return path.get();
+        } catch (ExecutionException | InterruptedException e) {
+            return "";
+        }
     }
 
     public static List<Issue> scan(Project project, Set<String> filesToScan)
             throws InterruptedIOException, InterruptedException {
-        if (!isMypyAvailable(project)) {
-            Notifications.showMypyNotAvailable(project);
+        if (!checkMypyAvailable(project, true)) {
             return Collections.emptyList();
         }
         MypyConfigService mypyConfigService = MypyConfigService.getInstance(project);
@@ -98,12 +200,14 @@ public class MypyRunner {
             throw new MypyPluginException("Illegal state: mypyConfigService is null");
         }
 
-        String pathToMypy = mypyConfigService.getPathToMypy();
-        if (pathToMypy.isEmpty()) {
+        String mypyPath = getMypyPath(project);
+        if (mypyPath.isEmpty()) {
             throw new MypyToolException("Path to Mypy executable not set (check Plugin Settings)");
         }
 
         String[] args = mypyConfigService.getMypyArguments().split(" ", -1);
+
+        String mypyConfigFilePath = getMypyConfigFile(project, mypyConfigService.getMypyConfigFilePath());
 
         // Necessary because of this: https://github.com/python/mypy/issues/4008#issuecomment-417862464
         List<Issue> result = new ArrayList<>();
@@ -113,23 +217,24 @@ public class MypyRunner {
                     || filePath.endsWith("__main__.py")
                     || filePath.endsWith("setup.py")
             ) {
-                result.addAll(runMypy(project, Collections.singleton(filePath), pathToMypy, args));
+                result.addAll(runMypy(project, Collections.singleton(filePath), mypyPath, mypyConfigFilePath, args));
             } else {
                 filesToScanFiltered.add(filePath);
             }
         }
-        result.addAll(runMypy(project, filesToScanFiltered, pathToMypy, args));
+        result.addAll(runMypy(project, filesToScanFiltered, mypyPath, mypyConfigFilePath, args));
         return result;
     }
 
-    private static List<Issue> runMypy(Project project, Set<String> filesToScan, String pathToMypy, String[] args)
+    private static List<Issue> runMypy(Project project, Set<String> filesToScan, String mypyPath,
+                                       String mypyConfigFilePath, String[] args)
             throws InterruptedIOException, InterruptedException {
         if (filesToScan.isEmpty()) {
             return Collections.emptyList();
         }
         boolean daemon = false;
 
-        GeneralCommandLine cmd = new GeneralCommandLine(pathToMypy);
+        GeneralCommandLine cmd = new GeneralCommandLine(mypyPath);
         cmd.setCharset(Charset.forName("UTF-8"));
         if (daemon) {
             cmd.addParameter("run");
@@ -140,6 +245,12 @@ public class MypyRunner {
         }
         cmd.addParameter("--follow-imports");
         cmd.addParameter("skip");
+
+        if (!mypyConfigFilePath.isEmpty()) {
+            cmd.addParameter("--config-file");
+            cmd.addParameter(mypyConfigFilePath);
+        }
+
         for (String arg : args) {
             if (!StringUtil.isEmpty(arg)) {
                 cmd.addParameter(arg);
@@ -153,6 +264,7 @@ public class MypyRunner {
         try {
             process = cmd.createProcess();
             InputStream inputStream = process.getInputStream();
+            //TODO check stderr for errors
             //            process.waitFor();
             return parseMypyOutput(inputStream);
         } catch (InterruptedIOException e) {
@@ -188,4 +300,48 @@ public class MypyRunner {
         return issues;
     }
 
+    private static GeneralCommandLine getMypyCommandLine(Project project, String pathToMypy) {
+        GeneralCommandLine cmd;
+        VirtualFile interpreterFile = getInterpreterFile(project);
+        if (interpreterFile == null) {
+            cmd = new GeneralCommandLine(pathToMypy);
+        } else {
+            cmd = new GeneralCommandLine(interpreterFile.getPath());
+            cmd.addParameter(pathToMypy);
+        }
+        return cmd;
+    }
+
+    @Nullable
+    private static VirtualFile getInterpreterFile(Project project) {
+        Sdk projectSdk = ProjectRootManager.getInstance(project).getProjectSdk();
+        if (projectSdk != null) {
+            return projectSdk.getHomeDirectory();
+        }
+        return null;
+    }
+
+    private static void injectEnvironmentVariables(Project project, GeneralCommandLine cmd) {
+        VirtualFile interpreterFile = getInterpreterFile(project);
+        Map<String, String> extraEnv = null;
+        Map<String, String> systemEnv = System.getenv();
+        Map<String, String> expandedCmdEnv = PySdkUtil.mergeEnvVariables(systemEnv, cmd.getEnvironment());
+        if (isVenv(interpreterFile)) {
+            String venvPath = PathUtil.getParentPath(PathUtil.getParentPath(interpreterFile.getPath()));
+            extraEnv = new HashMap<>();
+            extraEnv.put(ENV_KEY_VIRTUAL_ENV, venvPath);
+            if (expandedCmdEnv.containsKey(ENV_KEY_PATH)) {
+                PythonEnvUtil.addPathToEnv(expandedCmdEnv, ENV_KEY_PATH, venvPath);
+            }
+            expandedCmdEnv.remove(ENV_KEY_PYTHONHOME);
+        }
+        Map<String, String> env = extraEnv != null ? PySdkUtil.mergeEnvVariables(expandedCmdEnv, extraEnv) :
+                expandedCmdEnv;
+        cmd.withEnvironment(env);
+    }
+
+    private static boolean isVenv(@Nullable VirtualFile interpreterFile) {
+        return interpreterFile != null && interpreterFile.getPath()
+                .contains(File.separator + "venv" + File.separator);
+    }
 }

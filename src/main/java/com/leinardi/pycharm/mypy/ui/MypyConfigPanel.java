@@ -36,23 +36,34 @@ import java.awt.event.ActionEvent;
 public class MypyConfigPanel {
     private JPanel rootPanel;
     private JButton testButton;
+    private com.intellij.openapi.ui.TextFieldWithBrowseButton mypyPathField;
+    private com.intellij.openapi.ui.TextFieldWithBrowseButton mypyConfigFilePathField;
     private JBTextField argumentsField;
-    private TextFieldWithBrowseButton pathToMypyField;
     private Project project;
 
     public MypyConfigPanel(Project project) {
         this.project = project;
         MypyConfigService mypyConfigService = MypyConfigService.getInstance(project);
+        if (mypyConfigService == null) {
+            throw new IllegalStateException("MypyConfigService is null");
+        }
+        testButton.setAction(new TestAction());
+        mypyPathField.setText(mypyConfigService.getCustomMypyPath());
         FileChooserDescriptor fileChooserDescriptor = new FileChooserDescriptor(
                 true, false, false, false, false, false);
-        pathToMypyField.addBrowseFolderListener(
+        mypyPathField.addBrowseFolderListener(
                 "",
-                MypyBundle.message("config.file.browse.tooltip"),
+                MypyBundle.message("config.mypy.path.tooltip"),
                 null,
                 fileChooserDescriptor,
                 TextComponentAccessor.TEXT_FIELD_WHOLE_TEXT);
-        testButton.setAction(new TestAction());
-        pathToMypyField.setText(mypyConfigService.getPathToMypy());
+        mypyConfigFilePathField.setText(mypyConfigService.getMypyConfigFilePath());
+        mypyConfigFilePathField.addBrowseFolderListener(
+                "",
+                MypyBundle.message("config.mypy-config-file.path.tooltip"),
+                null,
+                fileChooserDescriptor,
+                TextComponentAccessor.TEXT_FIELD_WHOLE_TEXT);
         argumentsField.setText(mypyConfigService.getMypyArguments());
         argumentsField.getEmptyText().setText(MypyBundle.message("config.optional"));
     }
@@ -61,12 +72,34 @@ public class MypyConfigPanel {
         return rootPanel;
     }
 
-    public String getPathToMypy() {
-        return pathToMypyField.getText();
+    public String getMypyPath() {
+        return getMypyPath(false);
+    }
+
+    public String getMypyPath(boolean autodetect) {
+        String path = mypyPathField.getText();
+        if (path.isEmpty() && autodetect) {
+            return MypyRunner.getMypyPath(project, false);
+        }
+        return path;
+    }
+
+    public String getMypyConfigFilePath() {
+        return mypyConfigFilePathField.getText();
     }
 
     public String getMypyArguments() {
         return argumentsField.getText();
+    }
+
+    private void createUIComponents() {
+        JBTextField autodetectTextField = new JBTextField();
+        autodetectTextField.getEmptyText()
+                .setText(MypyBundle.message("config.auto-detect", MypyRunner.getMypyPath(project, false)));
+        mypyPathField = new TextFieldWithBrowseButton(autodetectTextField);
+        JBTextField optionalTextField = new JBTextField();
+        optionalTextField.getEmptyText().setText(MypyBundle.message("config.optional"));
+        mypyConfigFilePathField = new TextFieldWithBrowseButton(optionalTextField);
     }
 
     private final class TestAction extends AbstractAction {
@@ -78,8 +111,8 @@ public class MypyConfigPanel {
 
         @Override
         public void actionPerformed(final ActionEvent e) {
-            String pathToMypy = getPathToMypy();
-            if (MypyRunner.isPathToMypyValid(pathToMypy)) {
+            String pathToMypy = getMypyPath(true);
+            if (MypyRunner.isMypyPathValid(pathToMypy, project)) {
                 testButton.setIcon(Icons.icon("/general/inspectionsOK.png"));
                 Notifications.showInfo(
                         project,

@@ -73,7 +73,7 @@ public class MypyInspection extends LocalInspectionTool {
 
         final MypyPlugin plugin = plugin(manager.getProject());
 
-        if (!MypyRunner.isMypyAvailable(plugin.getProject())) {
+        if (!MypyRunner.checkMypyAvailable(plugin.getProject())) {
             LOG.debug("Scan failed: Mypy not available.");
             return NO_PROBLEMS_FOUND;
         }
