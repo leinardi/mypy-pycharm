@@ -16,12 +16,11 @@
 
 package com.leinardi.pycharm.mypy.ui;
 
-import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.LocalFileSystem;
-import com.intellij.openapi.vfs.VfsUtilCore;
-import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.ui.TextComponentAccessor;
+import com.intellij.openapi.ui.TextFieldWithBrowseButton;
+import com.intellij.ui.components.JBTextField;
 import com.leinardi.pycharm.mypy.MypyBundle;
 import com.leinardi.pycharm.mypy.MypyConfigService;
 import com.leinardi.pycharm.mypy.mpapi.MypyRunner;
@@ -32,105 +31,75 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 import java.awt.event.ActionEvent;
-import java.io.File;
-import java.nio.file.Paths;
-
-import static org.apache.commons.lang.StringUtils.isBlank;
 
 public class MypyConfigPanel {
-    private JTextField pathToMypyTextField;
     private JPanel rootPanel;
-    private JButton browseButton;
     private JButton testButton;
-    private JTextField argumentsTextField;
+    private com.intellij.openapi.ui.TextFieldWithBrowseButton mypyPathField;
+    private com.intellij.openapi.ui.TextFieldWithBrowseButton mypyConfigFilePathField;
+    private JBTextField argumentsField;
     private Project project;
 
     public MypyConfigPanel(Project project) {
         this.project = project;
         MypyConfigService mypyConfigService = MypyConfigService.getInstance(project);
-        browseButton.setAction(new BrowseAction());
+        if (mypyConfigService == null) {
+            throw new IllegalStateException("MypyConfigService is null");
+        }
         testButton.setAction(new TestAction());
-        pathToMypyTextField.setText(mypyConfigService.getPathToMypy());
-        argumentsTextField.setText(mypyConfigService.getMypyArguments());
+        mypyPathField.setText(mypyConfigService.getCustomMypyPath());
+        FileChooserDescriptor fileChooserDescriptor = new FileChooserDescriptor(
+                true, false, false, false, false, false);
+        mypyPathField.addBrowseFolderListener(
+                "",
+                MypyBundle.message("config.mypy.path.tooltip"),
+                null,
+                fileChooserDescriptor,
+                TextComponentAccessor.TEXT_FIELD_WHOLE_TEXT);
+        mypyConfigFilePathField.setText(mypyConfigService.getMypyConfigFilePath());
+        mypyConfigFilePathField.addBrowseFolderListener(
+                "",
+                MypyBundle.message("config.mypy-config-file.path.tooltip"),
+                null,
+                fileChooserDescriptor,
+                TextComponentAccessor.TEXT_FIELD_WHOLE_TEXT);
+        argumentsField.setText(mypyConfigService.getMypyArguments());
+        argumentsField.getEmptyText().setText(MypyBundle.message("config.optional"));
     }
 
     public JPanel getPanel() {
         return rootPanel;
     }
 
-    public String getPathToMypy() {
-        return pathToMypyTextField.getText();
+    public String getMypyPath() {
+        return getMypyPath(false);
+    }
+
+    public String getMypyPath(boolean autodetect) {
+        String path = mypyPathField.getText();
+        if (path.isEmpty() && autodetect) {
+            return MypyRunner.getMypyPath(project, false);
+        }
+        return path;
+    }
+
+    public String getMypyConfigFilePath() {
+        return mypyConfigFilePathField.getText();
     }
 
     public String getMypyArguments() {
-        return argumentsTextField.getText();
+        return argumentsField.getText();
     }
 
-    private String fileLocation() {
-        final String filename = trim(pathToMypyTextField.getText());
-
-        if (new File(filename).exists()) {
-            return filename;
-        }
-
-        final File projectRelativePath = projectRelativeFileOf(filename);
-        if (projectRelativePath.exists()) {
-            return projectRelativePath.getAbsolutePath();
-        }
-
-        return filename;
-    }
-
-    private File projectRelativeFileOf(final String filename) {
-        return Paths.get(new File(project.getBasePath(), filename).getAbsolutePath())
-                .normalize()
-                .toAbsolutePath()
-                .toFile();
-    }
-
-    private String trim(final String text) {
-        if (text != null) {
-            return text.trim();
-        }
-        return null;
-    }
-
-    private final class BrowseAction extends AbstractAction {
-
-        BrowseAction() {
-            putValue(Action.NAME, MypyBundle.message(
-                    "config.file.browse.text"));
-            putValue(Action.SHORT_DESCRIPTION,
-                    MypyBundle.message("config.file.browse.tooltip"));
-            putValue(Action.LONG_DESCRIPTION,
-                    MypyBundle.message("config.file.browse.tooltip"));
-        }
-
-        @Override
-        public void actionPerformed(final ActionEvent e) {
-            final VirtualFile toSelect;
-            final String configFilePath = fileLocation();
-            if (!isBlank(configFilePath)) {
-                toSelect = LocalFileSystem.getInstance().findFileByPath(configFilePath);
-            } else {
-                toSelect = project.getBaseDir();
-            }
-
-            final FileChooserDescriptor descriptor = new FileChooserDescriptor(
-                    true,
-                    false,
-                    false,
-                    false,
-                    false,
-                    false);
-            final VirtualFile chosen = FileChooser.chooseFile(descriptor, project, toSelect);
-            if (chosen != null) {
-                final File newConfigFile = VfsUtilCore.virtualToIoFile(chosen);
-                pathToMypyTextField.setText(newConfigFile.getAbsolutePath());
-            }
-        }
+    private void createUIComponents() {
+        JBTextField autodetectTextField = new JBTextField();
+        autodetectTextField.getEmptyText()
+                .setText(MypyBundle.message("config.auto-detect", MypyRunner.getMypyPath(project, false)));
+        mypyPathField = new TextFieldWithBrowseButton(autodetectTextField);
+        JBTextField optionalTextField = new JBTextField();
+        optionalTextField.getEmptyText().setText(MypyBundle.message("config.optional"));
+        mypyConfigFilePathField = new TextFieldWithBrowseButton(optionalTextField);
     }
 
     private final class TestAction extends AbstractAction {
@@ -142,8 +111,8 @@ public class MypyConfigPanel {
 
         @Override
         public void actionPerformed(final ActionEvent e) {
-            String pathToMypy = getPathToMypy();
-            if (MypyRunner.isPathToMypyValid(pathToMypy, false)) {
+            String pathToMypy = getMypyPath(true);
+            if (MypyRunner.isMypyPathValid(pathToMypy, project)) {
                 testButton.setIcon(Icons.icon("/general/inspectionsOK.png"));
                 Notifications.showInfo(
                         project,

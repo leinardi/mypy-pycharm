@@ -27,6 +27,7 @@ import com.leinardi.pycharm.mypy.checker.Problem;
 import com.leinardi.pycharm.mypy.checker.ScanFiles;
 import com.leinardi.pycharm.mypy.checker.ScannableFile;
 import com.leinardi.pycharm.mypy.exception.MypyPluginParseException;
+import com.leinardi.pycharm.mypy.mpapi.MypyRunner;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -47,6 +48,7 @@ public class MypyInspection extends LocalInspectionTool {
 
     private static final Logger LOG = Logger.getInstance(MypyInspection.class);
     private static final List<Problem> NO_PROBLEMS_FOUND = Collections.emptyList();
+    private static final String ERROR_MESSAGE_INVALID_SYNTAX = "invalid syntax";
 
     private MypyPlugin plugin(final Project project) {
         final MypyPlugin mypyPlugin = project.getComponent(MypyPlugin.class);
@@ -71,6 +73,11 @@ public class MypyInspection extends LocalInspectionTool {
 
         final MypyPlugin plugin = plugin(manager.getProject());
 
+        if (!MypyRunner.checkMypyAvailable(plugin.getProject())) {
+            LOG.debug("Scan failed: Mypy not available.");
+            return NO_PROBLEMS_FOUND;
+        }
+
         final List<ScannableFile> scannableFiles = new ArrayList<>();
         try {
             scannableFiles.addAll(ScannableFile.createAndValidate(singletonList(psiFile), plugin));
@@ -79,6 +86,8 @@ public class MypyInspection extends LocalInspectionTool {
             }
             ScanFiles scanFiles = new ScanFiles(plugin, Collections.singletonList(psiFile.getVirtualFile()));
             Map<PsiFile, List<Problem>> map = scanFiles.call();
+            map.values().forEach(problems -> problems.removeIf(problem ->
+                    problem.getMessage().equals(ERROR_MESSAGE_INVALID_SYNTAX)));
             if (map.isEmpty()) {
                 return NO_PROBLEMS_FOUND;
             }

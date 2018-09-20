@@ -40,7 +40,7 @@ public class Settings extends BaseAction {
             throw new IllegalStateException("Couldn't get mypy plugin");
         }
 
-        ShowSettingsUtil.getInstance().editConfigurable(project, new MypyConfigurable(project));
+        ShowSettingsUtil.getInstance().showSettingsDialog(project, MypyConfigurable.class);
     }
 
 }

@@ -16,9 +16,23 @@
 
 package com.leinardi.pycharm.mypy.util;
 
+import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationGroup;
+import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.projectRoots.Sdk;
+import com.intellij.openapi.roots.ProjectRootManager;
+import com.intellij.webcore.packaging.PackageManagementService;
+import com.intellij.webcore.packaging.PackageManagementService.ErrorDescription;
+import com.leinardi.pycharm.mypy.MypyBundle;
+import com.leinardi.pycharm.mypy.actions.Settings;
+import com.leinardi.pycharm.mypy.mpapi.MypyRunner;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -33,7 +47,7 @@ import static com.leinardi.pycharm.mypy.MypyBundle.message;
 import static com.leinardi.pycharm.mypy.util.Exceptions.rootCauseOf;
 
 public final class Notifications {
-
+    private static final Logger LOG = com.intellij.openapi.diagnostic.Logger.getInstance(Notifications.class);
     private static final NotificationGroup BALLOON_GROUP = balloonGroup(message("plugin.notification.alerts"));
     private static final NotificationGroup LOG_ONLY_GROUP = logOnlyGroup(message("plugin.notification.logging"));
     private static final String TITLE = message("plugin.name");
@@ -83,6 +97,44 @@ public final class Notifications {
                 .notify(project);
     }
 
+    public static void showInstallMypy(final Project project) {
+        Notification notification = BALLOON_GROUP
+                .createNotification(
+                        TITLE,
+                        MypyBundle.message("plugin.notification.install-mypy.subtitle"),
+                        MypyBundle.message("plugin.notification.install-mypy.content"),
+                        ERROR,
+                        URL_OPENING_LISTENER);
+        notification
+                .addAction(new InstallMypyAction(project, notification))
+                .notify(project);
+    }
+
+    public static void showUnableToRunMypy(final Project project) {
+        Notification notification = BALLOON_GROUP
+                .createNotification(
+                        TITLE,
+                        MypyBundle.message("plugin.notification.unable-to-run-mypy.subtitle"),
+                        MypyBundle.message("plugin.notification.unable-to-run-mypy.content"),
+                        ERROR,
+                        URL_OPENING_LISTENER);
+        notification
+                .addAction(new OpenPluginSettingsAction(notification))
+                .notify(project);
+    }
+
+    public static void showNoPythonInterpreter(Project project) {
+        Notification notification = BALLOON_GROUP
+                .createNotification(
+                        TITLE,
+                        MypyBundle.message("plugin.notification.no-python-interpreter.content"),
+                        ERROR,
+                        URL_OPENING_LISTENER);
+        notification
+                .addAction(new ConfigurePythonInterpreterAction(project, notification))
+                .notify(project);
+    }
+
     @NotNull
     private static String messageFor(final Throwable t) {
         if (t.getCause() != null) {
@@ -98,6 +150,73 @@ public final class Notifications {
         return t.getMessage() + "<br>" + sw.toString()
                 .replaceAll("\t", "&nbsp;&nbsp;")
                 .replaceAll("\n", "<br>");
+    }
+
+    private static class OpenPluginSettingsAction extends AnAction {
+        private Notification notification;
+
+        OpenPluginSettingsAction(Notification notification) {
+            super(MypyBundle.message("plugin.notification.action.plugin-settings"));
+            this.notification = notification;
+        }
+
+        @Override
+        public void actionPerformed(AnActionEvent event) {
+            new Settings().actionPerformed(event);
+            notification.expire();
+        }
+    }
+
+    private static class ConfigurePythonInterpreterAction extends AnAction {
+        private Project project;
+        private Notification notification;
+
+        ConfigurePythonInterpreterAction(Project project, Notification notification) {
+            super(MypyBundle.message("plugin.notification.action.configure-python-interpreter"));
+            this.project = project;
+            this.notification = notification;
+        }
+
+        @Override
+        public void actionPerformed(AnActionEvent ignored) {
+            ShowSettingsUtil.getInstance().showSettingsDialog(project, "Project Interpreter");
+            notification.expire();
+        }
+    }
+
+    private static class InstallMypyAction extends AnAction {
+        private Project project;
+        private Notification notification;
+
+        InstallMypyAction(Project project, Notification notification) {
+            super(MypyBundle.message("plugin.notification.action.install-mypy"));
+            this.project = project;
+            this.notification = notification;
+        }
+
+        @Override
+        public void actionPerformed(AnActionEvent ignored) {
+            Sdk projectSdk = ProjectRootManager.getInstance(project).getProjectSdk();
+            if (projectSdk == null) {
+                LOG.debug("Project interpreter not set");
+            } else {
+                ApplicationManager.getApplication().invokeLater(() -> {
+                    final PackageManagementService.Listener listener = new PackageManagementService.Listener() {
+                        @Override
+                        public void operationStarted(final String packageName) {
+                            notification.expire();
+                        }
+
+                        @Override
+                        public void operationFinished(final String packageName,
+                                                      @Nullable final ErrorDescription errorDescription) {
+                            notification.expire();
+                        }
+                    };
+                    PyPackageManagerUtil.install(project, MypyRunner.MYPY_PACKAGE_NAME, listener);
+                });
+            }
+        }
     }
 
 }

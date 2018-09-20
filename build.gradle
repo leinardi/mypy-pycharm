@@ -32,7 +32,7 @@ buildscript {
 }
 
 plugins {
-    id 'org.jetbrains.intellij' version '0.3.7'
+    id 'org.jetbrains.intellij' version '0.3.9'
     id 'net.ltgt.errorprone' version '0.0.16'
     id 'idea'
     id 'java'
@@ -70,7 +70,7 @@ targetCompatibility = JavaVersion.VERSION_1_8
 
 intellij {
     version ideaVersion
-    pluginName props.getProperty('plugin.name').toLowerCase() + "-plugin"
+    pluginName props.getProperty('plugin.name').toLowerCase().replace(' ', '-')
     downloadSources Boolean.valueOf(downloadIdeaSources)
     updateSinceUntilBuild = true
     if (hasPyCharm) {
@@ -120,7 +120,7 @@ check.dependsOn(verifyPlugin)
 
 task violationCommentsToGitHub(type: se.bjurr.violations.comments.github.plugin.gradle.ViolationCommentsToGitHubTask) {
     repositoryOwner = "leinardi"
-    repositoryName = "FloatingActionButtonSpeedDial"
+    repositoryName = "mypy-pycharm"
     pullRequestId = System.properties['GITHUB_PULLREQUESTID']
     oAuth2Token = System.properties['GITHUB_OAUTH2TOKEN']
     gitHubUrl = "https://api.github.com/"
