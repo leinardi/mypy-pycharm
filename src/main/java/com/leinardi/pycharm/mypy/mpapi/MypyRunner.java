@@ -54,6 +54,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -75,6 +76,7 @@ public class MypyRunner {
         }
         VirtualFile mypyFile = LocalFileSystem.getInstance().findFileByPath(mypyPath);
         if (mypyFile == null || !mypyFile.exists()) {
+            LOG.error("Error while checking Mypy path " + mypyPath + ": null or not exists");
             return false;
         }
         GeneralCommandLine cmd = getMypyCommandLine(project, mypyPath);
@@ -88,8 +90,20 @@ public class MypyRunner {
         try {
             process = cmd.createProcess();
             process.waitFor();
+            String error = new BufferedReader(new InputStreamReader(process.getErrorStream()))
+                    .lines().collect(Collectors.joining("\n"));
+            if (!StringUtil.isEmpty(error)) {
+                LOG.error("Error while checking Mypy path: " + error);
+            }
+            String output = new BufferedReader(new InputStreamReader(process.getInputStream()))
+                    .lines().collect(Collectors.joining("\n"));
+            if (!StringUtil.isEmpty(output)) {
+                LOG.error("Mypy path check output: " + output);
+            }
+            LOG.error("Mypy path check process.exitValue: " + process.exitValue());
             return process.exitValue() == 0;
         } catch (ExecutionException | InterruptedException e) {
+            LOG.error("Error while checking Mypy path", e);
             return false;
         }
     }
