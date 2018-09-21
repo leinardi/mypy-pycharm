@@ -1,3 +1,7 @@
+**[0.10.1] 2018-09-21**
+ - Fix #12: Mypy absolute path not working on Windows
+ - New: Mypy auto-detections for Windows
+ 
 **[0.10.0] 2018-09-17**
  - New: Support scanning inside current Virtualenv
  - New: Improved Mypy auto-detection
