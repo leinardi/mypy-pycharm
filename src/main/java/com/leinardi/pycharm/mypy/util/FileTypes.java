@@ -18,6 +18,10 @@ package com.leinardi.pycharm.mypy.util;
 
 import com.intellij.openapi.fileTypes.FileType;
 import com.jetbrains.python.PythonFileType;
+import org.jdesktop.swingx.util.OS;
+
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public final class FileTypes {
 
@@ -26,5 +30,9 @@ public final class FileTypes {
 
     public static boolean isPython(FileType fileType) {
         return fileType == PythonFileType.INSTANCE;
+    }
+
+    public static boolean isWindowsExecutable(String path) {
+        return OS.isWindows() && Files.isExecutable(Paths.get(path));
     }
 }
