@@ -34,6 +34,7 @@ import com.leinardi.pycharm.mypy.MypyConfigService;
 import com.leinardi.pycharm.mypy.exception.MypyPluginException;
 import com.leinardi.pycharm.mypy.exception.MypyPluginParseException;
 import com.leinardi.pycharm.mypy.exception.MypyToolException;
+import com.leinardi.pycharm.mypy.util.FileTypes;
 import com.leinardi.pycharm.mypy.util.Notifications;
 import org.jdesktop.swingx.util.OS;
 import org.jetbrains.annotations.Nullable;
@@ -97,6 +98,7 @@ public class MypyRunner {
             String error = new BufferedReader(new InputStreamReader(process.getErrorStream(), UTF_8))
                     .lines().collect(Collectors.joining("\n"));
             if (!StringUtil.isEmpty(error)) {
+                LOG.info("Command Line string: " + cmd.getCommandLineString());
                 LOG.error("Error while checking Mypy path: " + error);
             }
             String output = new BufferedReader(new InputStreamReader(process.getInputStream(), UTF_8))
@@ -105,12 +107,14 @@ public class MypyRunner {
                 LOG.debug("Mypy path check output: " + output);
             }
             if (process.exitValue() != 0) {
+                LOG.info("Command Line string: " + cmd.getCommandLineString());
                 LOG.error("Mypy path check process.exitValue: " + process.exitValue());
                 return false;
             } else {
                 return true;
             }
         } catch (ExecutionException | InterruptedException e) {
+            LOG.info("Command Line string: " + cmd.getCommandLineString());
             LOG.error("Error while checking Mypy path", e);
             return false;
         }
@@ -204,9 +208,11 @@ public class MypyRunner {
             String error = new BufferedReader(new InputStreamReader(process.getErrorStream(), UTF_8))
                     .lines().collect(Collectors.joining("\n"));
             if (!StringUtil.isEmpty(error)) {
+                LOG.info("Command Line string: " + cmd.getCommandLineString());
                 LOG.error("Error while detecting Mypy path: " + error);
             }
             if (process.exitValue() != 0 || !path.isPresent()) {
+                LOG.info("Command Line string: " + cmd.getCommandLineString());
                 LOG.error("Mypy path detect process.exitValue: " + process.exitValue());
                 return "";
             }
@@ -276,6 +282,8 @@ public class MypyRunner {
         cmd.addParameter("--follow-imports");
         cmd.addParameter("skip");
 
+        injectEnvironmentVariables(project, cmd);
+
         if (!mypyConfigFilePath.isEmpty()) {
             cmd.addParameter("--config-file");
             cmd.addParameter(mypyConfigFilePath);
@@ -298,10 +306,13 @@ public class MypyRunner {
             //            process.waitFor();
             return parseMypyOutput(inputStream);
         } catch (InterruptedIOException e) {
+            LOG.info("Command Line string: " + cmd.getCommandLineString());
             throw e;
         } catch (IOException e) {
+            LOG.info("Command Line string: " + cmd.getCommandLineString());
             throw new MypyPluginParseException(e.getMessage(), e);
         } catch (ExecutionException e) {
+            LOG.info("Command Line string: " + cmd.getCommandLineString());
             throw new MypyToolException("Error creating Mypy process", e);
         }
     }
@@ -330,14 +341,14 @@ public class MypyRunner {
         return issues;
     }
 
-    private static GeneralCommandLine getMypyCommandLine(Project project, String pathToMypy) {
+    private static GeneralCommandLine getMypyCommandLine(Project project, String mypyPath) {
         GeneralCommandLine cmd;
         VirtualFile interpreterFile = getInterpreterFile(project);
-        if (interpreterFile == null) {
-            cmd = new GeneralCommandLine(pathToMypy);
+        if (interpreterFile == null || FileTypes.isWindowsExecutable(mypyPath)) {
+            cmd = new GeneralCommandLine(mypyPath);
         } else {
             cmd = new GeneralCommandLine(interpreterFile.getPath());
-            cmd.addParameter(pathToMypy);
+            cmd.addParameter(mypyPath);
         }
         return cmd;
     }
