@@ -34,7 +34,9 @@ import com.leinardi.pycharm.mypy.MypyConfigService;
 import com.leinardi.pycharm.mypy.exception.MypyPluginException;
 import com.leinardi.pycharm.mypy.exception.MypyPluginParseException;
 import com.leinardi.pycharm.mypy.exception.MypyToolException;
+import com.leinardi.pycharm.mypy.util.FileTypes;
 import com.leinardi.pycharm.mypy.util.Notifications;
+import org.jdesktop.swingx.util.OS;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.BufferedReader;
@@ -54,27 +56,32 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class MypyRunner {
     public static final String MYPY_PACKAGE_NAME = "mypy";
+    private static final String MYPY_EXECUTABLE_NAME = MYPY_PACKAGE_NAME + (OS.isWindows() ? ".exe" : "");
     private static final Logger LOG = com.intellij.openapi.diagnostic.Logger.getInstance(MypyRunner.class);
     private static final String ENV_KEY_VIRTUAL_ENV = "VIRTUAL_ENV";
     private static final String ENV_KEY_PATH = "PATH";
     private static final String ENV_KEY_PYTHONHOME = "PYTHONHOME";
     private static final String TYPE_RE = " (error|warning|note):";
     private static final String ISSUE_RE = "([^\\s:]+):(\\d+:)?(\\d+:)?" + TYPE_RE + ".*";
+    private static final String WHICH_EXECUTABLE_NAME = OS.isWindows() ? "where" : "which";
 
     private MypyRunner() {
     }
 
     public static boolean isMypyPathValid(String mypyPath, Project project) {
-        if (!mypyPath.startsWith(File.separator)) {
+        String absolutePath = new File(mypyPath).getAbsolutePath();
+        if (!absolutePath.equals(mypyPath)) {
             mypyPath = project.getBasePath() + File.separator + mypyPath;
         }
         VirtualFile mypyFile = LocalFileSystem.getInstance().findFileByPath(mypyPath);
         if (mypyFile == null || !mypyFile.exists()) {
+            LOG.error("Error while checking Mypy path " + mypyPath + ": null or not exists");
             return false;
         }
         GeneralCommandLine cmd = getMypyCommandLine(project, mypyPath);
@@ -88,8 +95,27 @@ public class MypyRunner {
         try {
             process = cmd.createProcess();
             process.waitFor();
-            return process.exitValue() == 0;
+            String error = new BufferedReader(new InputStreamReader(process.getErrorStream(), UTF_8))
+                    .lines().collect(Collectors.joining("\n"));
+            if (!StringUtil.isEmpty(error)) {
+                LOG.info("Command Line string: " + cmd.getCommandLineString());
+                LOG.error("Error while checking Mypy path: " + error);
+            }
+            String output = new BufferedReader(new InputStreamReader(process.getInputStream(), UTF_8))
+                    .lines().collect(Collectors.joining("\n"));
+            if (!StringUtil.isEmpty(output)) {
+                LOG.debug("Mypy path check output: " + output);
+            }
+            if (process.exitValue() != 0) {
+                LOG.info("Command Line string: " + cmd.getCommandLineString());
+                LOG.error("Mypy path check process.exitValue: " + process.exitValue());
+                return false;
+            } else {
+                return true;
+            }
         } catch (ExecutionException | InterruptedException e) {
+            LOG.info("Command Line string: " + cmd.getCommandLineString());
+            LOG.error("Error while checking Mypy path", e);
             return false;
         }
     }
@@ -112,7 +138,7 @@ public class MypyRunner {
         VirtualFile interpreterFile = getInterpreterFile(project);
         if (isVenv(interpreterFile)) {
             VirtualFile mypyFile = LocalFileSystem.getInstance()
-                    .findFileByPath(interpreterFile.getParent().getPath() + File.separator + MYPY_PACKAGE_NAME);
+                    .findFileByPath(interpreterFile.getParent().getPath() + File.separator + MYPY_EXECUTABLE_NAME);
             if (mypyFile != null && mypyFile.exists()) {
                 return mypyFile.getPath();
             }
@@ -155,9 +181,10 @@ public class MypyRunner {
     }
 
     private static String getMypyConfigFile(Project project, String mypyConfigFilePath) throws MypyPluginException {
+        String absolutePath = new File(mypyConfigFilePath).getAbsolutePath();
         if (mypyConfigFilePath.isEmpty()) {
             return "";
-        } else if (!mypyConfigFilePath.startsWith(File.separator)) {
+        } else if (!absolutePath.equals(mypyConfigFilePath)) {
             mypyConfigFilePath = project.getBasePath() + File.separator + mypyConfigFilePath;
         }
         VirtualFile mypyConfigFileFile = LocalFileSystem.getInstance().findFileByPath(mypyConfigFilePath);
@@ -168,7 +195,7 @@ public class MypyRunner {
     }
 
     public static String detectSystemMypyPath() {
-        GeneralCommandLine cmd = new GeneralCommandLine("which");
+        GeneralCommandLine cmd = new GeneralCommandLine(WHICH_EXECUTABLE_NAME);
         cmd.addParameter(MYPY_PACKAGE_NAME);
         final Process process;
         try {
@@ -178,9 +205,18 @@ public class MypyRunner {
                     .lines()
                     .findFirst();
             process.waitFor();
+            String error = new BufferedReader(new InputStreamReader(process.getErrorStream(), UTF_8))
+                    .lines().collect(Collectors.joining("\n"));
+            if (!StringUtil.isEmpty(error)) {
+                LOG.info("Command Line string: " + cmd.getCommandLineString());
+                LOG.error("Error while detecting Mypy path: " + error);
+            }
             if (process.exitValue() != 0 || !path.isPresent()) {
+                LOG.info("Command Line string: " + cmd.getCommandLineString());
+                LOG.error("Mypy path detect process.exitValue: " + process.exitValue());
                 return "";
             }
+            LOG.info("Detected Mypy path: " + path.get());
             return path.get();
         } catch (ExecutionException | InterruptedException e) {
             return "";
@@ -246,6 +282,8 @@ public class MypyRunner {
         cmd.addParameter("--follow-imports");
         cmd.addParameter("skip");
 
+        injectEnvironmentVariables(project, cmd);
+
         if (!mypyConfigFilePath.isEmpty()) {
             cmd.addParameter("--config-file");
             cmd.addParameter(mypyConfigFilePath);
@@ -268,10 +306,13 @@ public class MypyRunner {
             //            process.waitFor();
             return parseMypyOutput(inputStream);
         } catch (InterruptedIOException e) {
+            LOG.info("Command Line string: " + cmd.getCommandLineString());
             throw e;
         } catch (IOException e) {
+            LOG.info("Command Line string: " + cmd.getCommandLineString());
             throw new MypyPluginParseException(e.getMessage(), e);
         } catch (ExecutionException e) {
+            LOG.info("Command Line string: " + cmd.getCommandLineString());
             throw new MypyToolException("Error creating Mypy process", e);
         }
     }
@@ -300,14 +341,14 @@ public class MypyRunner {
         return issues;
     }
 
-    private static GeneralCommandLine getMypyCommandLine(Project project, String pathToMypy) {
+    private static GeneralCommandLine getMypyCommandLine(Project project, String mypyPath) {
         GeneralCommandLine cmd;
         VirtualFile interpreterFile = getInterpreterFile(project);
-        if (interpreterFile == null) {
-            cmd = new GeneralCommandLine(pathToMypy);
+        if (interpreterFile == null || FileTypes.isWindowsExecutable(mypyPath)) {
+            cmd = new GeneralCommandLine(mypyPath);
         } else {
             cmd = new GeneralCommandLine(interpreterFile.getPath());
-            cmd.addParameter(pathToMypy);
+            cmd.addParameter(mypyPath);
         }
         return cmd;
     }

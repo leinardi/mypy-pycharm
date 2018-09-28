@@ -32,13 +32,13 @@ buildscript {
 }
 
 plugins {
-    id 'org.jetbrains.intellij' version '0.3.9'
+    id 'org.jetbrains.intellij' version '0.3.11'
     id 'net.ltgt.errorprone' version '0.0.16'
     id 'idea'
     id 'java'
     id 'checkstyle'
     id 'com.github.ben-manes.versions' version '0.20.0'
-    id 'se.bjurr.violations.violation-comments-to-github-gradle-plugin' version '1.42'
+    id 'se.bjurr.violations.violation-comments-to-github-gradle-plugin' version '1.49'
 }
 
 checkstyle {
@@ -90,6 +90,12 @@ patchPluginXml {
     changeNotes getChangelogHtml()
 }
 
+publishPlugin {
+    def publishPassword = project.hasProperty('jetbrainsPublishPassword') ? jetbrainsPublishPassword : ""
+    username publishUsername
+    password publishPassword
+    channels publishChannels
+}
 
 repositories {
     jcenter()
@@ -113,7 +119,7 @@ def getChangelogHtml() {
     Parser parser = Parser.builder().build()
     Node document = parser.parseReader(rootProject.file('CHANGELOG.md').newReader())
     HtmlRenderer renderer = HtmlRenderer.builder().build()
-    renderer.render(document)
+    renderer.render(document.firstChild.next)
 }
 
 check.dependsOn(verifyPlugin)
