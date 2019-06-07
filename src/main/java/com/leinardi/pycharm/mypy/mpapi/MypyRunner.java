@@ -280,7 +280,7 @@ public class MypyRunner {
             cmd.addParameter("--show-column-numbers");
         }
         cmd.addParameter("--follow-imports");
-        cmd.addParameter("skip");
+        cmd.addParameter("silent");
 
         injectEnvironmentVariables(project, cmd);
 
