@@ -1,3 +1,6 @@
+**[0.10.3] 2018-09-25**
+ - Fix #21: use `follow-imports=silent`
+ 
 **[0.10.2] 2018-09-25**
  - Fix #15: SyntaxError: Non-UTF-8 code starting with '\x90' when interpreter is set on Windows
 
