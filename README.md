@@ -76,7 +76,7 @@ feel free to open an issue on the [issue tracker](https://github.com/leinardi/my
 you can always leave a comment on the [Plugin Repository page](https://plugins.jetbrains.com/plugin/11086-mypy).
 
 ## Acknowledgements
-_If I have seen further it is by standing on the sholders of Giants - Isaac Newton_
+_If I have seen further it is by standing on the shoulders of Giants - Isaac Newton_
 
 A huge thank you to the project [CheckStyle-IDEA](https://github.com/jshiell/checkstyle-idea), 
 which code and architecture I have heavily used when developing this plugin.

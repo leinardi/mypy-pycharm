@@ -1,3 +1,6 @@
+**[0.10.4] 2019-06-23**
+ - New: Implementing a better virtualenv detection
+
 **[0.10.3] 2018-09-25**
  - Fix #21: use `follow-imports=silent`
  
