@@ -70,6 +70,7 @@ public class MypyRunner {
     private static final String TYPE_RE = " (error|warning|note):";
     private static final String ISSUE_RE = "([^\\s:]+):(\\d+:)?(\\d+:)?" + TYPE_RE + ".*";
     private static final String WHICH_EXECUTABLE_NAME = OS.isWindows() ? "where" : "which";
+    private static final String ACTIVATE_FILE_NAME = OS.isWindows() ? "activate.bat" : "activate";
 
     private MypyRunner() {
     }
@@ -280,7 +281,7 @@ public class MypyRunner {
             cmd.addParameter("--show-column-numbers");
         }
         cmd.addParameter("--follow-imports");
-        cmd.addParameter("skip");
+        cmd.addParameter("silent");
 
         injectEnvironmentVariables(project, cmd);
 
@@ -382,7 +383,6 @@ public class MypyRunner {
     }
 
     private static boolean isVenv(@Nullable VirtualFile interpreterFile) {
-        return interpreterFile != null && interpreterFile.getPath()
-                .contains(File.separator + "venv" + File.separator);
+        return interpreterFile != null && interpreterFile.getParent().findChild(ACTIVATE_FILE_NAME) != null;
     }
 }

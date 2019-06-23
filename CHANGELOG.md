@@ -1,3 +1,9 @@
+**[0.10.4] 2019-06-23**
+ - New: Implementing a better virtualenv detection
+
+**[0.10.3] 2018-09-25**
+ - Fix #21: use `follow-imports=silent`
+ 
 **[0.10.2] 2018-09-25**
  - Fix #15: SyntaxError: Non-UTF-8 code starting with '\x90' when interpreter is set on Windows
 
