@@ -100,7 +100,7 @@ public class MypyRunner {
                     .lines().collect(Collectors.joining("\n"));
             if (!StringUtil.isEmpty(error)) {
                 LOG.info("Command Line string: " + cmd.getCommandLineString());
-                LOG.error("Error while checking Mypy path: " + error);
+                LOG.warn("Error while checking Mypy path: " + error);
             }
             String output = new BufferedReader(new InputStreamReader(process.getInputStream(), UTF_8))
                     .lines().collect(Collectors.joining("\n"));
@@ -109,7 +109,7 @@ public class MypyRunner {
             }
             if (process.exitValue() != 0) {
                 LOG.info("Command Line string: " + cmd.getCommandLineString());
-                LOG.error("Mypy path check process.exitValue: " + process.exitValue());
+                LOG.warn("Mypy path check process.exitValue: " + process.exitValue());
                 return false;
             } else {
                 return true;
@@ -155,10 +155,11 @@ public class MypyRunner {
 
     public static boolean checkMypyAvailable(Project project, boolean showNotifications) {
         Sdk projectSdk = ProjectRootManager.getInstance(project).getProjectSdk();
-        if (projectSdk == null) {
-            if (showNotifications) {
-                Notifications.showNoPythonInterpreter(project);
-            }
+        if (projectSdk == null
+                || projectSdk.getHomeDirectory() == null
+                || !projectSdk.getHomeDirectory().exists()
+                && showNotifications) {
+            Notifications.showNoPythonInterpreter(project);
             return false;
         } else if (showNotifications) {
             PyPackageManager pyPackageManager = PyPackageManager.getInstance(projectSdk);
