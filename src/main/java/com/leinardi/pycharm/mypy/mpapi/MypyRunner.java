@@ -155,9 +155,9 @@ public class MypyRunner {
 
     public static boolean checkMypyAvailable(Project project, boolean showNotifications) {
         Sdk projectSdk = ProjectRootManager.getInstance(project).getProjectSdk();
-        if (projectSdk == null
+        if ((projectSdk == null
                 || projectSdk.getHomeDirectory() == null
-                || !projectSdk.getHomeDirectory().exists()
+                || !projectSdk.getHomeDirectory().exists())
                 && showNotifications) {
             Notifications.showNoPythonInterpreter(project);
             return false;
