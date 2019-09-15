@@ -1,3 +1,6 @@
+**[0.10.6] 2019-09-15**
+ - New: Improved error handling
+
 **[0.10.5] 2019-09-13**
  - New: Improved error handling
 
