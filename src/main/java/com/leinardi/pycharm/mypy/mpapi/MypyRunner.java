@@ -85,24 +85,21 @@ public class MypyRunner {
 
     public static boolean isMypyPathValid(String mypyPath, Project project) {
         File mypyFile = new File(mypyPath);
-        if (!mypyFile.isAbsolute())
-        {
+        if (!mypyFile.isAbsolute()) {
             String absolutePath = mypyFile.getAbsolutePath();
             if (!absolutePath.equals(mypyPath)) {
                 mypyPath = project.getBasePath() + File.separator + mypyPath;
             }
         }
-        if (mypyPath.isEmpty())
-		{
-			LOG.warn("Error while checking Mypy path: path is empty");
-			return false;
-		}
-		VirtualFile mypyVirtualFile = LocalFileSystem.getInstance().findFileByPath(mypyPath);
-		if (mypyVirtualFile == null || !mypyVirtualFile.exists() || mypyVirtualFile.isDirectory())
-		{
-			LOG.warn("Error while checking Mypy path " + mypyPath + ": null or not exists or not a file");
-			return false;
-		}
+        if (mypyPath.isEmpty()) {
+            LOG.warn("Error while checking Mypy path: path is empty");
+            return false;
+        }
+        VirtualFile mypyVirtualFile = LocalFileSystem.getInstance().findFileByPath(mypyPath);
+        if (mypyVirtualFile == null || !mypyVirtualFile.exists() || mypyVirtualFile.isDirectory()) {
+            LOG.warn("Error while checking Mypy path " + mypyPath + ": null or not exists or not a file");
+            return false;
+        }
         GeneralCommandLine cmd = getMypyCommandLine(project, mypyPath);
         boolean daemon = false;
         if (daemon) {
@@ -165,8 +162,7 @@ public class MypyRunner {
             String mypyPath;
             try {
                 mypyPath = detectVenvMypyPath(project);
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 return detectSystemMypyPath();
             }
             return mypyPath != null && !mypyPath.isEmpty() ? mypyPath : detectSystemMypyPath();
@@ -228,17 +224,19 @@ public class MypyRunner {
         if (interpreterPath == null) {
             return null;
         }
-        String venvPath = Paths.get(PathUtil.getParentPath(PathUtil.getParentPath(interpreterPath)), "Scripts").toString();
+        String venvPath =
+                Paths.get(PathUtil.getParentPath(PathUtil.getParentPath(interpreterPath)), "Scripts").toString();
         return findFileByName("mypy", venvPath, "glob:**/*.exe");
     }
 
     @Nullable
-    private static String findFileByName(String fileName, String folderPath, String syntaxAndPattern) throws IOException {
+    private static String findFileByName(String fileName, String folderPath, String syntaxAndPattern)
+            throws IOException {
         final PathMatcher matcher = FileSystems.getDefault().getPathMatcher(syntaxAndPattern);
 
         Files.walkFileTree(Paths.get(folderPath), new SimpleFileVisitor<Path>() {
             @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
                 if (matcher.matches(file) && file.endsWith(fileName)) {
                     return FileVisitResult.valueOf(file.toString());
                 }
@@ -246,7 +244,7 @@ public class MypyRunner {
             }
 
             @Override
-            public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+            public FileVisitResult visitFileFailed(Path file, IOException exc) {
                 return FileVisitResult.CONTINUE;
             }
         });
