@@ -46,6 +46,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
 import java.nio.charset.Charset;
+import java.nio.file.FileSystems;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.PathMatcher;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -76,15 +84,25 @@ public class MypyRunner {
     }
 
     public static boolean isMypyPathValid(String mypyPath, Project project) {
-        String absolutePath = new File(mypyPath).getAbsolutePath();
-        if (!absolutePath.equals(mypyPath)) {
-            mypyPath = project.getBasePath() + File.separator + mypyPath;
+        File mypyFile = new File(mypyPath);
+        if (!mypyFile.isAbsolute())
+        {
+            String absolutePath = mypyFile.getAbsolutePath();
+            if (!absolutePath.equals(mypyPath)) {
+                mypyPath = project.getBasePath() + File.separator + mypyPath;
+            }
         }
-        VirtualFile mypyFile = LocalFileSystem.getInstance().findFileByPath(mypyPath);
-        if (mypyFile == null || !mypyFile.exists()) {
-            LOG.error("Error while checking Mypy path " + mypyPath + ": null or not exists");
-            return false;
-        }
+        if (mypyPath.isEmpty())
+		{
+			LOG.warn("Error while checking Mypy path: path is empty");
+			return false;
+		}
+		VirtualFile mypyVirtualFile = LocalFileSystem.getInstance().findFileByPath(mypyPath);
+		if (mypyVirtualFile == null || !mypyVirtualFile.exists() || mypyVirtualFile.isDirectory())
+		{
+			LOG.warn("Error while checking Mypy path " + mypyPath + ": null or not exists or not a file");
+			return false;
+		}
         GeneralCommandLine cmd = getMypyCommandLine(project, mypyPath);
         boolean daemon = false;
         if (daemon) {
@@ -144,7 +162,14 @@ public class MypyRunner {
                 return mypyFile.getPath();
             }
         } else {
-            return detectSystemMypyPath();
+            String mypyPath;
+            try {
+                mypyPath = detectVenvMypyPath(project);
+            }
+            catch (IOException e) {
+                return detectSystemMypyPath();
+            }
+            return mypyPath != null && !mypyPath.isEmpty() ? mypyPath : detectSystemMypyPath();
         }
         return "";
     }
@@ -195,6 +220,37 @@ public class MypyRunner {
             throw new MypyPluginException("mypy config file is not valid. File does not exist or can't be read.");
         }
         return mypyConfigFilePath;
+    }
+
+    public static String detectVenvMypyPath(Project project) throws IOException {
+        VirtualFile interpreterFile = getInterpreterFile(project);
+        String interpreterPath = interpreterFile != null ? interpreterFile.getPath() : null;
+        if (interpreterPath == null) {
+            return null;
+        }
+        String venvPath = Paths.get(PathUtil.getParentPath(PathUtil.getParentPath(interpreterPath)), "Scripts").toString();
+        return findFileByName("mypy", venvPath, "glob:**/*.exe");
+    }
+
+    @Nullable
+    private static String findFileByName(String fileName, String folderPath, String syntaxAndPattern) throws IOException {
+        final PathMatcher matcher = FileSystems.getDefault().getPathMatcher(syntaxAndPattern);
+
+        Files.walkFileTree(Paths.get(folderPath), new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                if (matcher.matches(file) && file.endsWith(fileName)) {
+                    return FileVisitResult.valueOf(file.toString());
+                }
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+                return FileVisitResult.CONTINUE;
+            }
+        });
+        return null;
     }
 
     public static String detectSystemMypyPath() {
