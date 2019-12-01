@@ -76,13 +76,13 @@ public class MypyRunner {
     }
 
     public static boolean isMypyPathValid(String mypyPath, Project project) {
-        String absolutePath = new File(mypyPath).getAbsolutePath();
-        if (!absolutePath.equals(mypyPath)) {
+        File mypyFile = new File(mypyPath);
+        if (!mypyFile.isAbsolute() && !mypyFile.getAbsolutePath().equalsIgnoreCase(mypyPath)) {
             mypyPath = project.getBasePath() + File.separator + mypyPath;
         }
-        VirtualFile mypyFile = LocalFileSystem.getInstance().findFileByPath(mypyPath);
-        if (mypyFile == null || !mypyFile.exists()) {
-            LOG.error("Error while checking Mypy path " + mypyPath + ": null or not exists");
+        VirtualFile mypyVirtualFile = LocalFileSystem.getInstance().findFileByPath(mypyPath);
+        if (mypyVirtualFile == null || !mypyVirtualFile.exists() || mypyVirtualFile.isDirectory()) {
+            LOG.warn("Error while checking Mypy path " + mypyPath + ": null or not exists or not a file path");
             return false;
         }
         GeneralCommandLine cmd = getMypyCommandLine(project, mypyPath);
@@ -176,7 +176,8 @@ public class MypyRunner {
         if (mypyConfigService == null) {
             throw new IllegalStateException("MypyConfigService is null");
         }
-        boolean isMypyPathValid = isMypyPathValid(getMypyPath(project), project);
+        String mypyPath = getMypyPath(project);
+        boolean isMypyPathValid = !mypyPath.isEmpty() && isMypyPathValid(mypyPath, project);
         if (showNotifications && !isMypyPathValid) {
             Notifications.showUnableToRunMypy(project);
         }

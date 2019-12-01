@@ -5,12 +5,12 @@ Any HTML comment will be stripped when the markdown is rendered, so you don't ne
 <!-- You can remove this first section if you have contributed before -->
 ### First time contributor checklist
 <!-- replace the empty checkboxes [ ] below with checked ones [x] accordingly -->
-- [ ] I have read [how to contribute](/.github/CONTRIBUTING.md) to this project
-- [ ] I have read [the code of conduct](/.github/CODE_OF_CONDUCT.md) to this project
+- [ ] I have read [how to contribute](https://github.com/leinardi/mypy-pycharm/blob/release/.github/CONTRIBUTING.md) to this project
+- [ ] I have read [the code of conduct](https://github.com/leinardi/mypy-pycharm/blob/release/.github/CODE_OF_CONDUCT.md) to this project
 
 ### Contributor checklist
 <!-- replace the empty checkboxes [ ] below with checked ones [x] accordingly -->
-- [ ] I am using the provided [codeStyleConfig.xml](/.idea/codeStyles)
+- [ ] I am using the provided [codeStyleConfig.xml](https://github.com/leinardi/mypy-pycharm/blob/release/.idea/codeStyles/codeStyleConfig.xml)
 - [ ] I have tested my contribution on these versions of PyCharm/IDEA:
  * PyCharm Community XXXX.Y.Z
  * IntelliJ IDEA XXXX.Y.Z
