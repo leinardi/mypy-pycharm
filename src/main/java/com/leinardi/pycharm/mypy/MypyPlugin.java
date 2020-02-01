@@ -110,14 +110,6 @@ public final class MypyPlugin implements ProjectComponent {
         return ID_PLUGIN;
     }
 
-    @Override
-    public void initComponent() {
-    }
-
-    @Override
-    public void disposeComponent() {
-    }
-
     public static void processErrorAndLog(@NotNull final String action, @NotNull final Throwable e) {
         LOG.warn(action + " failed", e);
     }
