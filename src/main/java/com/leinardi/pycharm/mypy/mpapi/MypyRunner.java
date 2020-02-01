@@ -18,6 +18,7 @@ package com.leinardi.pycharm.mypy.mpapi;
 
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.GeneralCommandLine;
+import com.intellij.execution.configurations.ParametersList;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.Sdk;
@@ -244,8 +245,6 @@ public class MypyRunner {
             throw new MypyToolException("Path to Mypy executable not set (check Plugin Settings)");
         }
 
-        String[] args = mypyConfigService.getMypyArguments().split(" ", -1);
-
         String mypyConfigFilePath = getMypyConfigFile(project, mypyConfigService.getMypyConfigFilePath());
 
         // Necessary because of this: https://github.com/python/mypy/issues/4008#issuecomment-417862464
@@ -256,17 +255,18 @@ public class MypyRunner {
                     || filePath.endsWith("__main__.py")
                     || filePath.endsWith("setup.py")
             ) {
-                result.addAll(runMypy(project, Collections.singleton(filePath), mypyPath, mypyConfigFilePath, args));
+                result.addAll(runMypy(project, Collections.singleton(filePath), mypyPath, mypyConfigFilePath,
+                        mypyConfigService));
             } else {
                 filesToScanFiltered.add(filePath);
             }
         }
-        result.addAll(runMypy(project, filesToScanFiltered, mypyPath, mypyConfigFilePath, args));
+        result.addAll(runMypy(project, filesToScanFiltered, mypyPath, mypyConfigFilePath, mypyConfigService));
         return result;
     }
 
     private static List<Issue> runMypy(Project project, Set<String> filesToScan, String mypyPath,
-                                       String mypyConfigFilePath, String[] args)
+                                       String mypyConfigFilePath, MypyConfigService mypyConfigService)
             throws InterruptedIOException, InterruptedException {
         if (filesToScan.isEmpty()) {
             return Collections.emptyList();
@@ -292,11 +292,9 @@ public class MypyRunner {
             cmd.addParameter(mypyConfigFilePath);
         }
 
-        for (String arg : args) {
-            if (!StringUtil.isEmpty(arg)) {
-                cmd.addParameter(arg);
-            }
-        }
+        ParametersList parametersList = cmd.getParametersList();
+        parametersList.addParametersString(mypyConfigService.getMypyArguments());
+
         for (String file : filesToScan) {
             cmd.addParameter(file);
         }

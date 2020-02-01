@@ -1,3 +1,6 @@
+**[next] 2020-02-01**
+ - New: Improved error Mypy custom arguments handling
+
 **[0.10.6] 2019-09-15**
  - New: Improved error handling
 
