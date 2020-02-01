@@ -16,17 +16,16 @@
 
 package com.leinardi.pycharm.mypy.checker;
 
-import com.intellij.openapi.application.AccessToken;
+import com.intellij.application.options.CodeStyle;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.roots.ModuleRootManager;
+import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiJavaFile;
-import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
 import com.leinardi.pycharm.mypy.MypyPlugin;
 import com.leinardi.pycharm.mypy.util.TempDirProvider;
 import org.jetbrains.annotations.NotNull;
@@ -40,13 +39,14 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.IntUnaryOperator;
-import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
@@ -89,16 +89,12 @@ public class ScannableFile {
     public static List<ScannableFile> createAndValidate(@NotNull final Collection<PsiFile> psiFiles,
                                                         @NotNull final MypyPlugin plugin/*,
                                                         @Nullable final Module module*/) {
-
-        final AccessToken readAccessToken = ApplicationManager.getApplication().acquireReadActionLock();
-        try {
-            return psiFiles.stream()
-                    .filter(psiFile -> PsiFileValidator.isScannable(psiFile, plugin.getProject()))
-                    .map(psiFile -> ScannableFile.create(psiFile))
-                    .filter(Objects::nonNull).collect(Collectors.toList());
-        } finally {
-            readAccessToken.finish();
-        }
+        Computable<List<ScannableFile>> action = () -> psiFiles.stream()
+                .filter(currentFile -> PsiFileValidator.isScannable(currentFile, plugin.getProject()))
+                .map(ScannableFile::create)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(CopyOnWriteArrayList::new));
+        return ApplicationManager.getApplication().runReadAction(action);
     }
 
     @Nullable
@@ -160,12 +156,13 @@ public class ScannableFile {
         return tmpDirForFile;
     }
 
-    @NotNull
-    private File classPackagePath(final @NotNull PsiJavaFile file, final @NotNull File baseTmpDir) {
-        final String packagePath = file.getPackageName().replaceAll("\\.", Matcher.quoteReplacement(File.separator));
-
-        return new File(baseTmpDir.getAbsolutePath() + File.separator + packagePath);
-    }
+    //    @NotNull
+    //    private File classPackagePath(final @NotNull PsiJavaFile file, final @NotNull File baseTmpDir) {
+    //        final String packagePath = file.getPackageName().replaceAll("\\.", Matcher.quoteReplacement(File
+    //        .separator));
+    //
+    //        return new File(baseTmpDir.getAbsolutePath() + File.separator + packagePath);
+    //    }
 
     private File relativePathToProjectRoot(final @NotNull PsiFile file, final @NotNull File baseTmpDir) {
         if (file.getParent() != null) {
@@ -225,7 +222,7 @@ public class ScannableFile {
     }
 
     private void writeContentsToFile(final PsiFile file, final File outFile) throws IOException {
-        final String lineSeparator = CodeStyleSettingsManager.getSettings(file.getProject()).getLineSeparator();
+        final String lineSeparator = CodeStyle.getSettings(file.getProject()).getLineSeparator();
 
         final Writer tempFileOut = writerTo(outFile, charSetOf(file));
         for (final char character : file.getText().toCharArray()) {
@@ -241,7 +238,7 @@ public class ScannableFile {
 
     @NotNull
     private Charset charSetOf(final PsiFile file) {
-        return virtualFileOf(file).map(VirtualFile::getCharset).orElseGet(() -> Charset.forName("UTF-8"));
+        return virtualFileOf(file).map(VirtualFile::getCharset).orElse(StandardCharsets.UTF_8);
     }
 
     private Optional<VirtualFile> virtualFileOf(final PsiFile file) {

@@ -32,20 +32,20 @@ buildscript {
 }
 
 plugins {
-    id 'org.jetbrains.intellij' version '0.4.10'
+    id 'org.jetbrains.intellij' version '0.4.16'
     id 'net.ltgt.errorprone' version '0.0.16'
     id 'idea'
     id 'java'
     id 'checkstyle'
-    id 'com.github.ben-manes.versions' version '0.25.0'
-    id 'se.bjurr.violations.violation-comments-to-github-gradle-plugin' version '1.59'
+    id 'com.github.ben-manes.versions' version '0.27.0'
+    id 'se.bjurr.violations.violation-comments-to-github-gradle-plugin' version '1.60'
 }
 
 checkstyle {
     ignoreFailures = false // Whether this task will ignore failures and continue running the build.
     configFile rootProject.file('config/checkstyle/checkstyle.xml')
     // The Checkstyle configuration file to use.
-    toolVersion = '8.12' // The version of Checkstyle you want to be used
+    toolVersion = '8.29' // The version of Checkstyle you want to be used
 }
 
 def hasPyCharm = project.hasProperty('pycharmPath')
