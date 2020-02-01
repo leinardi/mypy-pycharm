@@ -1,5 +1,8 @@
-**[next] 2020-02-01**
- - New: Improved error Mypy custom arguments handling
+**[0.11.0] 2020-02-01**
+ - New: Min IDEA version raised from 2016 to 2018
+ - New: Improved Mypy custom arguments handling
+ - New: Tidied up deprecations in the 2018 SDK
+ - New: Fixed possible deadlock during inspection
 
 **[0.10.6] 2019-09-15**
  - New: Improved error handling
