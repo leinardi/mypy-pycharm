@@ -111,7 +111,11 @@ public class MypyInspection extends LocalInspectionTool {
     private void handlePluginException(final Throwable e,
                                        final @NotNull PsiFile psiFile,
                                        final @NotNull Project project) {
-        if (e.getCause() != null && e.getCause() instanceof IOException) {
+
+        if (e.getCause() != null && e.getCause() instanceof ProcessCanceledException) {
+            LOG.debug("Process cancelled when scanning: " + psiFile.getName());
+
+        } else if (e.getCause() != null && e.getCause() instanceof IOException) {
             showWarning(project, message("mypy.file-io-failed"));
 
         } else {
