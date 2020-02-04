@@ -1,3 +1,6 @@
+**[0.11.1] 2020-02-01**
+ - Fixed regression generating several errors in Event Log during inspection
+
 **[0.11.0] 2020-02-01**
  - New: Min IDEA version raised from 2016 to 2018
  - New: Improved Mypy custom arguments handling
