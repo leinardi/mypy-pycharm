@@ -1,4 +1,4 @@
-**[0.11.1] 2020-02-01**
+**[0.11.1] 2020-02-04**
  - Fixed regression generating several errors in Event Log during inspection
 
 **[0.11.0] 2020-02-01**
