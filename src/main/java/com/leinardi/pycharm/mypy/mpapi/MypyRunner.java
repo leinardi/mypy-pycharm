@@ -117,7 +117,7 @@ public class MypyRunner {
             }
         } catch (ExecutionException | InterruptedException e) {
             LOG.info("Command Line string: " + cmd.getCommandLineString());
-            LOG.error("Error while checking Mypy path", e);
+            LOG.warn("Error while checking Mypy path", e);
             return false;
         }
     }
@@ -214,11 +214,11 @@ public class MypyRunner {
                     .lines().collect(Collectors.joining("\n"));
             if (!StringUtil.isEmpty(error)) {
                 LOG.info("Command Line string: " + cmd.getCommandLineString());
-                LOG.error("Error while detecting Mypy path: " + error);
+                LOG.warn("Error while detecting Mypy path: " + error);
             }
             if (process.exitValue() != 0 || !path.isPresent()) {
                 LOG.info("Command Line string: " + cmd.getCommandLineString());
-                LOG.error("Mypy path detect process.exitValue: " + process.exitValue());
+                LOG.warn("Mypy path detect process.exitValue: " + process.exitValue());
                 return "";
             }
             LOG.info("Detected Mypy path: " + path.get());
