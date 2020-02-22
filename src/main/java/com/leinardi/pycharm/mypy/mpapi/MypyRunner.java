@@ -87,12 +87,9 @@ public class MypyRunner {
             return false;
         }
         GeneralCommandLine cmd = getMypyCommandLine(project, mypyPath);
-        boolean daemon = false;
-        if (daemon) {
-            cmd.addParameter("status");
-        } else {
-            cmd.addParameter("-V");
-        }
+
+        cmd.addParameter("-V");
+
         final Process process;
         try {
             process = cmd.createProcess();
