@@ -269,19 +269,23 @@ public class MypyRunner {
         if (filesToScan.isEmpty()) {
             return Collections.emptyList();
         }
-        boolean daemon = false;
+        boolean daemon = true;
 
         GeneralCommandLine cmd = new GeneralCommandLine(mypyPath);
-        cmd.setCharset(Charset.forName("UTF-8"));
+        cmd.setCharset(UTF_8);
         if (daemon) {
             cmd.addParameter("run");
             cmd.addParameter("--");
-            cmd.addParameter("--show-column-numbers");
-        } else {
-            cmd.addParameter("--show-column-numbers");
         }
+
+        cmd.addParameter("--show-column-numbers");
         cmd.addParameter("--follow-imports");
-        cmd.addParameter("silent");
+
+        if (daemon) {
+            cmd.addParameter("error");
+        } else {
+            cmd.addParameter("silent");
+        }
 
         injectEnvironmentVariables(project, cmd);
 
@@ -297,12 +301,22 @@ public class MypyRunner {
             cmd.addParameter(file);
         }
         cmd.setWorkDirectory(project.getBasePath());
+
+        LOG.debug("Command Line string: " + cmd.getCommandLineString());
+
         final Process process;
         try {
             process = cmd.createProcess();
             InputStream inputStream = process.getInputStream();
-            //TODO check stderr for errors
-            //            process.waitFor();
+
+            String error = new BufferedReader(new InputStreamReader(process.getErrorStream(), UTF_8))
+                    .lines().collect(Collectors.joining("\n"));
+            if (!StringUtil.isEmpty(error)) {
+                LOG.info("Command Line string: " + cmd.getCommandLineString());
+                throw new MypyToolException("Error while running Mypy: " + error);
+            }
+
+            //  process.waitFor();
             return parseMypyOutput(inputStream);
         } catch (InterruptedIOException e) {
             LOG.info("Command Line string: " + cmd.getCommandLineString());
