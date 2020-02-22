@@ -276,7 +276,7 @@ public class MypyRunner {
         if (daemon) {
             cmd.addParameter("run");
             cmd.addParameter("--");
-            cmd.addParameter("``--show-column-numbers");
+            cmd.addParameter("--show-column-numbers");
         } else {
             cmd.addParameter("--show-column-numbers");
         }
