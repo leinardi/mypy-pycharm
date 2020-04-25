@@ -32,7 +32,7 @@ buildscript {
 }
 
 plugins {
-    id 'org.jetbrains.intellij' version '0.4.16'
+    id 'org.jetbrains.intellij' version '0.4.17'
     id 'net.ltgt.errorprone' version '0.0.16'
     id 'idea'
     id 'java'
