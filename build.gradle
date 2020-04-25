@@ -32,7 +32,7 @@ buildscript {
 }
 
 plugins {
-    id 'org.jetbrains.intellij' version '0.4.16'
+    id 'org.jetbrains.intellij' version '0.4.17'
     id 'net.ltgt.errorprone' version '0.0.16'
     id 'idea'
     id 'java'
@@ -53,8 +53,8 @@ def hasPythonPlugin = project.hasProperty('pythonPlugin')
 def props = new Properties()
 rootProject.file('src/main/resources/com/leinardi/pycharm/mypy/MypyBundle.properties')
         .withInputStream {
-    props.load(it)
-}
+            props.load(it)
+        }
 
 gradle.projectsEvaluated {
     tasks.withType(JavaCompile) {
@@ -75,10 +75,9 @@ intellij {
     updateSinceUntilBuild = true
     if (hasPyCharm) {
         alternativeIdePath pycharmPath
-    } else if (hasPythonPlugin) {
+    }
+    if (hasPythonPlugin) {
         plugins += [pythonPlugin]
-    } else {
-        throw new StopActionException('Define either pycharmPath or pythonPlugin in your gradle.properties')
     }
 }
 

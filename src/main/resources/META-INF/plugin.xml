@@ -84,19 +84,19 @@
                     class="com.leinardi.pycharm.mypy.actions.DisplayErrors"
                     text="Display Errors"
                     description="Display error results"
-                    icon="/compiler/error.png"/>
+                    icon="/general/error.png"/>
 
             <action id="MypyDisplayWarningsAction"
                     class="com.leinardi.pycharm.mypy.actions.DisplayWarnings"
                     text="Display Warnings"
                     description="Display warning results"
-                    icon="/compiler/warning.png"/>
+                    icon="/general/warning.png"/>
 
             <action id="MypyDisplayNoteAction"
                     class="com.leinardi.pycharm.mypy.actions.DisplayNote"
                     text="Display Note"
                     description="Display Note results"
-                    icon="/compiler/information.png"/>
+                    icon="/general/information.png"/>
 
             <separator/>
 
@@ -137,28 +137,28 @@
                     class="com.leinardi.pycharm.mypy.actions.ScanModule"
                     text="Check Module"
                     description="Run Mypy on all files in the current module"
-                    icon="/modules/modulesNode.png">
+                    icon="/nodes/ideaModule.png">
             </action>
 
             <action id="MypyProjectFilesAction"
                     class="com.leinardi.pycharm.mypy.actions.ScanProject"
                     text="Check Project"
                     description="Run Mypy on all files in the current project"
-                    icon="/general/projectTab.png">
+                    icon="/nodes/ideaProject.png">
             </action>
 
             <action id="MypyModifiedFilesAction"
                     class="com.leinardi.pycharm.mypy.actions.ScanModifiedFiles"
                     text="Check All Modified Files"
                     description="Run Mypy on all modified files"
-                    icon="/general/toolWindowChanges.png">
+                    icon="/actions/listChanges.png">
             </action>
 
             <action id="MypyDefaultChangeListAction"
                     class="com.leinardi.pycharm.mypy.actions.ScanCurrentChangeList"
                     text="Check Files in the Current Change List"
                     description="Run Mypy on the current change list"
-                    icon="/general/smallConfigurableVcs.png">
+                    icon="/vcs/patch.png">
             </action>
 
             <separator/>
