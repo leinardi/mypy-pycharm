@@ -278,13 +278,6 @@ public class MypyRunner {
         }
 
         cmd.addParameter("--show-column-numbers");
-        cmd.addParameter("--follow-imports");
-
-        if (daemon) {
-            cmd.addParameter("error");
-        } else {
-            cmd.addParameter("silent");
-        }
 
         injectEnvironmentVariables(project, cmd);
 
