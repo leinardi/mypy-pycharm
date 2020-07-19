@@ -31,11 +31,13 @@ public class MypyConfigService implements PersistentStateComponent<MypyConfigSer
     private String mypyConfigFilePath;
     private String mypyArguments;
     private boolean scanBeforeCheckin;
+    private boolean useDaemon;
 
     public MypyConfigService() {
         customMypyPath = "";
         mypyArguments = "";
         mypyConfigFilePath = "";
+        useDaemon = true;
     }
 
     public String getCustomMypyPath() {
@@ -68,6 +70,14 @@ public class MypyConfigService implements PersistentStateComponent<MypyConfigSer
 
     public void setScanBeforeCheckin(boolean scanBeforeCheckin) {
         this.scanBeforeCheckin = scanBeforeCheckin;
+    }
+
+    public boolean isUseDaemon() {
+        return useDaemon;
+    }
+
+    public void setUseDaemon(boolean useDaemon) {
+        this.useDaemon = useDaemon;
     }
 
     @Nullable

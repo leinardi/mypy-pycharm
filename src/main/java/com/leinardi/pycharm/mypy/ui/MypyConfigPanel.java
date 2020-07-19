@@ -20,6 +20,7 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.TextComponentAccessor;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
+import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBTextField;
 import com.leinardi.pycharm.mypy.MypyBundle;
 import com.leinardi.pycharm.mypy.MypyConfigService;
@@ -39,6 +40,7 @@ public class MypyConfigPanel {
     private com.intellij.openapi.ui.TextFieldWithBrowseButton mypyPathField;
     private com.intellij.openapi.ui.TextFieldWithBrowseButton mypyConfigFilePathField;
     private JBTextField argumentsField;
+    private JBCheckBox useDaemonCheckBox;
     private Project project;
 
     public MypyConfigPanel(Project project) {
@@ -91,6 +93,8 @@ public class MypyConfigPanel {
     public String getMypyArguments() {
         return argumentsField.getText();
     }
+
+    public boolean getUseDaemon() { return useDaemonCheckBox.isSelected(); }
 
     private void createUIComponents() {
         JBTextField autodetectTextField = new JBTextField();

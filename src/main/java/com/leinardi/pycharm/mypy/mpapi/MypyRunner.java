@@ -268,11 +268,10 @@ public class MypyRunner {
         if (filesToScan.isEmpty()) {
             return Collections.emptyList();
         }
-        boolean daemon = true;
 
         GeneralCommandLine cmd = new GeneralCommandLine(mypyPath);
         cmd.setCharset(UTF_8);
-        if (daemon) {
+        if (mypyConfigService.isUseDaemon()) {
             cmd.addParameter("run");
             cmd.addParameter("--");
         }

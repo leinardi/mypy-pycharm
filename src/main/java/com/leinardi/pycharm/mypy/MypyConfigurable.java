@@ -68,7 +68,8 @@ public class MypyConfigurable implements Configurable {
     public boolean isModified() {
         boolean result = !configPanel.getMypyPath().equals(mypyConfigService.getCustomMypyPath())
                 || !configPanel.getMypyConfigFilePath().equals(mypyConfigService.getMypyConfigFilePath())
-                || !configPanel.getMypyArguments().equals(mypyConfigService.getMypyArguments());
+                || !configPanel.getMypyArguments().equals(mypyConfigService.getMypyArguments())
+                || !configPanel.getUseDaemon() == (mypyConfigService.isUseDaemon());
         if (LOG.isDebugEnabled()) {
             LOG.debug("Has config changed? " + result);
         }
@@ -80,6 +81,7 @@ public class MypyConfigurable implements Configurable {
         mypyConfigService.setCustomMypyPath(configPanel.getMypyPath());
         mypyConfigService.setMypyConfigFilePath(configPanel.getMypyConfigFilePath());
         mypyConfigService.setMypyArguments(configPanel.getMypyArguments());
+        mypyConfigService.setUseDaemon(configPanel.getUseDaemon());
     }
 
     @Override
