@@ -68,6 +68,7 @@ public class MypyConfigPanel {
                 TextComponentAccessor.TEXT_FIELD_WHOLE_TEXT);
         argumentsField.setText(mypyConfigService.getMypyArguments());
         argumentsField.getEmptyText().setText(MypyBundle.message("config.optional"));
+        useDaemonCheckBox.setSelected(mypyConfigService.isUseDaemon());
     }
 
     public JPanel getPanel() {
