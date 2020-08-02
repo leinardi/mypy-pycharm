@@ -37,7 +37,7 @@ public class MypyConfigService implements PersistentStateComponent<MypyConfigSer
         customMypyPath = "";
         mypyArguments = "";
         mypyConfigFilePath = "";
-        useDaemon = true;
+        useDaemon = false;
     }
 
     public String getCustomMypyPath() {
