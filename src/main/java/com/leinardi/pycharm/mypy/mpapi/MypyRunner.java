@@ -304,17 +304,26 @@ public class MypyRunner {
         cmd.setWorkDirectory(project.getBasePath());
 
         LOG.debug("Command Line string: " + cmd.getCommandLineString());
-
-        final Process process;
         try {
-            process = cmd.createProcess();
-            InputStream inputStream = process.getInputStream();
+            final int retryLimit = 5;
+            InputStream inputStream = null;
+            for (int retryCount = 1; retryCount <= retryLimit; retryCount++) {
+                final Process process = cmd.createProcess();
+                inputStream = process.getInputStream();
 
-            String error = new BufferedReader(new InputStreamReader(process.getErrorStream(), UTF_8))
-                    .lines().collect(Collectors.joining("\n"));
-            if (!StringUtil.isEmpty(error)) {
-                LOG.info("Command Line string: " + cmd.getCommandLineString());
-                throw new MypyToolException("Error while running Mypy: " + error);
+                String error = new BufferedReader(new InputStreamReader(process.getErrorStream(), UTF_8))
+                        .lines().collect(Collectors.joining("\n"));
+                if (StringUtil.isEmpty(error)) {
+                    break;
+                } else {
+                    LOG.info("Command Line string: " + cmd.getCommandLineString());
+                    // the daemon sometimes fails when idea invokes the inspection multiple times
+                    if (mypyConfigService.isUseDaemon() && error.equals("The connection is busy.")) {
+                        LOG.warn(error + " attempt #" + retryCount);
+                    } else {
+                        throw new MypyToolException("Error while running Mypy: " + error);
+                    }
+                }
             }
 
             //  process.waitFor();
