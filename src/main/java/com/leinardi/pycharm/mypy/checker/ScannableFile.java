@@ -190,7 +190,7 @@ public class ScannableFile {
     }
 
     private File prepareBaseTmpDirFor(final PsiFile tempPsiFile) {
-        final File baseTmpDir = new File(new TempDirProvider().forPersistedPsiFile(tempPsiFile),
+        final File baseTmpDir = new File(new TempDirProvider(tempPsiFile.getProject()).forPersistedPsiFile(tempPsiFile),
                 tempFileDirectoryName());
         baseTmpDir.deleteOnExit();
         return baseTmpDir;
