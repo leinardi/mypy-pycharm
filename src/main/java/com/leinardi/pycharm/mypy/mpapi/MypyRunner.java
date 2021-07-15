@@ -46,7 +46,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
-import java.nio.charset.Charset;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -87,12 +88,9 @@ public class MypyRunner {
             return false;
         }
         GeneralCommandLine cmd = getMypyCommandLine(project, mypyPath);
-        boolean daemon = false;
-        if (daemon) {
-            cmd.addParameter("status");
-        } else {
-            cmd.addParameter("-V");
-        }
+
+        cmd.addParameter("-V");
+
         final Process process;
         try {
             process = cmd.createProcess();
@@ -272,19 +270,23 @@ public class MypyRunner {
         if (filesToScan.isEmpty()) {
             return Collections.emptyList();
         }
-        boolean daemon = false;
+
+        if (mypyConfigService.isUseDaemon()) {
+            // build path to dmypy by assuming that it sits right next to the selected mypy executable
+            // with the only difference being that the name has "dmypy" in it rather than just "mypy"
+            Path p = Paths.get(mypyPath);
+            String dFile = p.getFileName().toString().replace("mypy", "dmypy");
+            mypyPath = Paths.get(p.getParent().toString(), dFile).toString();
+        }
 
         GeneralCommandLine cmd = new GeneralCommandLine(mypyPath);
-        cmd.setCharset(Charset.forName("UTF-8"));
-        if (daemon) {
+        cmd.setCharset(UTF_8);
+        if (mypyConfigService.isUseDaemon()) {
             cmd.addParameter("run");
             cmd.addParameter("--");
-            cmd.addParameter("``--show-column-numbers");
-        } else {
-            cmd.addParameter("--show-column-numbers");
         }
-        cmd.addParameter("--follow-imports");
-        cmd.addParameter("silent");
+
+        cmd.addParameter("--show-column-numbers");
 
         injectEnvironmentVariables(project, cmd);
 
@@ -300,12 +302,31 @@ public class MypyRunner {
             cmd.addParameter(file);
         }
         cmd.setWorkDirectory(project.getBasePath());
-        final Process process;
+
+        LOG.debug("Command Line string: " + cmd.getCommandLineString());
         try {
-            process = cmd.createProcess();
-            InputStream inputStream = process.getInputStream();
-            //TODO check stderr for errors
-            //            process.waitFor();
+            final int retryLimit = 5;
+            InputStream inputStream = null;
+            for (int retryCount = 1; retryCount <= retryLimit; retryCount++) {
+                final Process process = cmd.createProcess();
+                inputStream = process.getInputStream();
+
+                String error = new BufferedReader(new InputStreamReader(process.getErrorStream(), UTF_8))
+                        .lines().collect(Collectors.joining("\n"));
+                if (StringUtil.isEmpty(error)) {
+                    break;
+                } else {
+                    LOG.info("Command Line string: " + cmd.getCommandLineString());
+                    // the daemon sometimes fails when idea invokes the inspection multiple times
+                    if (mypyConfigService.isUseDaemon() && error.equals("The connection is busy.")) {
+                        LOG.warn(error + " attempt #" + retryCount);
+                    } else {
+                        throw new MypyToolException("Error while running Mypy: " + error);
+                    }
+                }
+            }
+
+            //  process.waitFor();
             return parseMypyOutput(inputStream);
         } catch (InterruptedIOException e) {
             LOG.info("Command Line string: " + cmd.getCommandLineString());
