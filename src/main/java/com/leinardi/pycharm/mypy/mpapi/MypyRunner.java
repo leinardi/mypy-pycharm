@@ -38,6 +38,7 @@ import com.leinardi.pycharm.mypy.exception.MypyToolException;
 import com.leinardi.pycharm.mypy.util.FileTypes;
 import com.leinardi.pycharm.mypy.util.Notifications;
 import org.jdesktop.swingx.util.OS;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.BufferedReader;
@@ -304,6 +305,7 @@ public class MypyRunner {
         try {
             process = cmd.createProcess();
             InputStream inputStream = process.getInputStream();
+            assert (inputStream != null);
             //TODO check stderr for errors
             //            process.waitFor();
             return parseMypyOutput(inputStream);
@@ -319,7 +321,8 @@ public class MypyRunner {
         }
     }
 
-    private static List<Issue> parseMypyOutput(InputStream inputStream) throws IOException {
+    @NotNull
+    public static List<Issue> parseMypyOutput(@NotNull InputStream inputStream) throws IOException {
         ArrayList<Issue> issues = new ArrayList<>();
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, UTF_8));
         String rawLine;
@@ -333,7 +336,7 @@ public class MypyRunner {
                     String path = splitPosition[0].trim();
                     int line = splitPosition.length > 1 ? Integer.parseInt(splitPosition[1].trim()) : 1;
                     int column = splitPosition.length > 2 ? Integer.parseInt(splitPosition[2].trim()) : 1;
-                    String[] splitError = rawLine.substring(typeIndexStart).split(":", -1);
+                    String[] splitError = rawLine.substring(typeIndexStart).split(":", 2);
                     SeverityLevel severityLevel = SeverityLevel.valueOf(splitError[0].trim().toUpperCase());
                     String message = splitError[1].trim();
                     issues.add(new Issue(path, line, column, severityLevel, message));
