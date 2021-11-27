@@ -33,7 +33,7 @@ buildscript {
 
 plugins {
     id 'org.jetbrains.intellij' version '0.4.17'
-    id 'net.ltgt.errorprone' version '0.0.16'
+    id 'net.ltgt.errorprone' version '2.0.2'
     id 'idea'
     id 'java'
     id 'checkstyle'
@@ -45,7 +45,7 @@ checkstyle {
     ignoreFailures = false // Whether this task will ignore failures and continue running the build.
     configFile rootProject.file('config/checkstyle/checkstyle.xml')
     // The Checkstyle configuration file to use.
-    toolVersion = '8.29' // The version of Checkstyle you want to be used
+    toolVersion = '9.1' // The version of Checkstyle you want to be used
 }
 
 def hasPyCharm = project.hasProperty('pycharmPath')
@@ -110,7 +110,7 @@ dependencies {
     if (hasPyCharm) {
         compileOnly name: 'pycharm'
     }
-    errorprone 'com.google.errorprone:error_prone_core:2.3.1'
+    errorprone 'com.google.errorprone:error_prone_core:2.10.0'
 }
 
 def getChangelogHtml() {
