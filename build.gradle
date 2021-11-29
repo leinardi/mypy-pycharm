@@ -33,7 +33,7 @@ buildscript {
 
 plugins {
     id 'org.jetbrains.intellij' version '0.4.17'
-    id 'net.ltgt.errorprone' version '0.0.16'
+    id 'net.ltgt.errorprone' version '2.0.2'
     id 'idea'
     id 'java'
     id 'checkstyle'
@@ -45,11 +45,10 @@ checkstyle {
     ignoreFailures = false // Whether this task will ignore failures and continue running the build.
     configFile rootProject.file('config/checkstyle/checkstyle.xml')
     // The Checkstyle configuration file to use.
-    toolVersion = '8.29' // The version of Checkstyle you want to be used
+    toolVersion = '9.1' // The version of Checkstyle you want to be used
 }
 
-def hasPyCharm = project.hasProperty('pycharmPath')
-def hasPythonPlugin = project.hasProperty('pythonPlugin')
+def hasPycharmPath = project.hasProperty('pycharmPath')
 def props = new Properties()
 rootProject.file('src/main/resources/com/leinardi/pycharm/mypy/MypyBundle.properties')
         .withInputStream {
@@ -69,16 +68,14 @@ sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
 intellij {
-    version ideaVersion
+    version ideVersion
     pluginName props.getProperty('plugin.name').toLowerCase().replace(' ', '-')
     downloadSources Boolean.valueOf(downloadIdeaSources)
     updateSinceUntilBuild = true
-    if (hasPyCharm) {
+    if (hasPycharmPath) {
         alternativeIdePath pycharmPath
     }
-    if (hasPythonPlugin) {
-        plugins += [pythonPlugin]
-    }
+    plugins += [pythonPlugin]
 }
 
 patchPluginXml {
@@ -99,7 +96,7 @@ repositories {
     jcenter()
     maven { url "https://plugins.gradle.org/m2/" }
     maven { url 'https://dl.bintray.com/jetbrains/intellij-plugin-service' }
-    if (hasPyCharm) {
+    if (hasPycharmPath) {
         flatDir {
             dirs "$pycharmPath/lib"
         }
@@ -107,10 +104,10 @@ repositories {
 }
 
 dependencies {
-    if (hasPyCharm) {
+    if (hasPycharmPath) {
         compileOnly name: 'pycharm'
     }
-    errorprone 'com.google.errorprone:error_prone_core:2.3.1'
+    errorprone 'com.google.errorprone:error_prone_core:2.10.0'
 }
 
 def getChangelogHtml() {
