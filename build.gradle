@@ -49,7 +49,6 @@ checkstyle {
 }
 
 def hasPycharmPath = project.hasProperty('pycharmPath')
-def hasPythonPlugin = project.hasProperty('pythonPlugin')
 def props = new Properties()
 rootProject.file('src/main/resources/com/leinardi/pycharm/mypy/MypyBundle.properties')
         .withInputStream {
@@ -69,16 +68,14 @@ sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
 intellij {
-    version ideaVersion
+    version ideVersion
     pluginName props.getProperty('plugin.name').toLowerCase().replace(' ', '-')
     downloadSources Boolean.valueOf(downloadIdeaSources)
     updateSinceUntilBuild = true
     if (hasPycharmPath) {
         alternativeIdePath pycharmPath
     }
-    if (hasPythonPlugin) {
-        plugins += [pythonPlugin]
-    }
+    plugins += [pythonPlugin]
 }
 
 patchPluginXml {
