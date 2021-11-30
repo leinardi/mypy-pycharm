@@ -20,9 +20,8 @@ import org.commonmark.renderer.html.HtmlRenderer
 
 buildscript {
     repositories {
-        jcenter()
-        maven { url "https://plugins.gradle.org/m2/" }
-        maven { url 'https://dl.bintray.com/jetbrains/intellij-plugin-service' }
+        mavenCentral()
+        gradlePluginPortal()
     }
     dependencies {
         classpath 'com.atlassian.commonmark:commonmark:0.11.0'
@@ -93,9 +92,8 @@ publishPlugin {
 }
 
 repositories {
-    jcenter()
-    maven { url "https://plugins.gradle.org/m2/" }
-    maven { url 'https://dl.bintray.com/jetbrains/intellij-plugin-service' }
+    mavenCentral()
+    gradlePluginPortal()
     if (hasPycharmPath) {
         flatDir {
             dirs "$pycharmPath/lib"
