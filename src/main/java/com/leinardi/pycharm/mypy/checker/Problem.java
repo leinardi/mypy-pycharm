@@ -52,10 +52,10 @@ public class Problem {
         this.suppressErrors = suppressErrors;
     }
 
-    public void createAnnotation(@NotNull AnnotationHolder holder) {
+    public void createAnnotation(@NotNull AnnotationHolder holder, @NotNull HighlightSeverity severity) {
         String message = MypyBundle.message("inspection.message", getMessage());
         AnnotationBuilder annotation = holder
-                .newAnnotation(getHighlightSeverity(), message)
+                .newAnnotation(severity, message)
                 .range(target.getTextRange());
         if (isAfterEndOfLine()) {
             annotation = annotation.afterEndOfLine();
@@ -65,20 +65,6 @@ public class Problem {
 
     public SeverityLevel getSeverityLevel() {
         return severityLevel;
-    }
-
-    @NotNull
-    public HighlightSeverity getHighlightSeverity() {
-        switch (severityLevel) {
-            case ERROR:
-                return HighlightSeverity.ERROR;
-            case WARNING:
-            case NOTE: // WEAK_WARNING can be a bit difficult to see, use WARNING instead
-                return HighlightSeverity.WARNING;
-            default:
-                assert false : "Unhandled SeverityLevel: " + severityLevel;
-        }
-        return null;
     }
 
     public int getLine() {

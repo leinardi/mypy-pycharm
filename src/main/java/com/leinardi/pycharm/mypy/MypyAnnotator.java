@@ -16,11 +16,15 @@
 
 package com.leinardi.pycharm.mypy;
 
+import com.intellij.codeInsight.daemon.HighlightDisplayKey;
+import com.intellij.codeInspection.InspectionProfile;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.ExternalAnnotator;
+import com.intellij.lang.annotation.HighlightSeverity;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.Project;
+import com.intellij.profile.codeInspection.InspectionProjectProfileManager;
 import com.intellij.psi.PsiFile;
 import com.leinardi.pycharm.mypy.checker.Problem;
 import com.leinardi.pycharm.mypy.checker.ScanFiles;
@@ -160,9 +164,15 @@ public class MypyAnnotator extends ExternalAnnotator<MypyAnnotator.State, MypyAn
 
         LOG.debug("Applying " + results.issues.size() + " annotations for " + file.getName());
 
+        // Get severity from inspection profile
+        final InspectionProfile profile =
+                InspectionProjectProfileManager.getInstance(file.getProject()).getCurrentProfile();
+        final HighlightDisplayKey key = HighlightDisplayKey.find(MypyBatchInspection.INSPECTION_SHORT_NAME);
+        HighlightSeverity severity = profile.getErrorLevel(key, file).getSeverity();
+
         for (Problem problem : results.issues) {
             LOG.debug("                " + problem.getLine() + ": " + problem.getMessage());
-            problem.createAnnotation(holder);
+            problem.createAnnotation(holder, severity);
         }
     }
 
