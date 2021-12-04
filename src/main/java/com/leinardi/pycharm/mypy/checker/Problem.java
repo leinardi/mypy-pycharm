@@ -16,9 +16,9 @@
 
 package com.leinardi.pycharm.mypy.checker;
 
-import com.intellij.codeInspection.InspectionManager;
-import com.intellij.codeInspection.ProblemDescriptor;
-import com.intellij.codeInspection.ProblemHighlightType;
+import com.intellij.lang.annotation.AnnotationBuilder;
+import com.intellij.lang.annotation.AnnotationHolder;
+import com.intellij.lang.annotation.HighlightSeverity;
 import com.intellij.psi.PsiElement;
 import com.leinardi.pycharm.mypy.MypyBundle;
 import com.leinardi.pycharm.mypy.mpapi.SeverityLevel;
@@ -52,11 +52,15 @@ public class Problem {
         this.suppressErrors = suppressErrors;
     }
 
-    @NotNull
-    public ProblemDescriptor toProblemDescriptor(final InspectionManager inspectionManager) {
-        return inspectionManager.createProblemDescriptor(target,
-                MypyBundle.message("inspection.message", getMessage()),
-                null, problemHighlightType(), false, afterEndOfLine);
+    public void createAnnotation(@NotNull AnnotationHolder holder, @NotNull HighlightSeverity severity) {
+        String message = MypyBundle.message("inspection.message", getMessage());
+        AnnotationBuilder annotation = holder
+                .newAnnotation(severity, message)
+                .range(target.getTextRange());
+        if (isAfterEndOfLine()) {
+            annotation = annotation.afterEndOfLine();
+        }
+        annotation.create();
     }
 
     public SeverityLevel getSeverityLevel() {
@@ -81,10 +85,6 @@ public class Problem {
 
     public boolean isSuppressErrors() {
         return suppressErrors;
-    }
-
-    private ProblemHighlightType problemHighlightType() {
-        return ProblemHighlightType.GENERIC_ERROR_OR_WARNING;
     }
 
     @Override

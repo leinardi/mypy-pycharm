@@ -16,12 +16,15 @@
 
 package com.leinardi.pycharm.mypy;
 
-import com.intellij.codeInspection.InspectionManager;
-import com.intellij.codeInspection.LocalInspectionTool;
-import com.intellij.codeInspection.ProblemDescriptor;
+import com.intellij.codeInsight.daemon.HighlightDisplayKey;
+import com.intellij.codeInspection.InspectionProfile;
+import com.intellij.lang.annotation.AnnotationHolder;
+import com.intellij.lang.annotation.ExternalAnnotator;
+import com.intellij.lang.annotation.HighlightSeverity;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.Project;
+import com.intellij.profile.codeInspection.InspectionProjectProfileManager;
 import com.intellij.psi.PsiFile;
 import com.leinardi.pycharm.mypy.checker.Problem;
 import com.leinardi.pycharm.mypy.checker.ScanFiles;
@@ -38,16 +41,44 @@ import java.util.List;
 import java.util.Map;
 
 import static com.leinardi.pycharm.mypy.MypyBundle.message;
-import static com.leinardi.pycharm.mypy.util.Async.asyncResultOf;
 import static com.leinardi.pycharm.mypy.util.Notifications.showException;
 import static com.leinardi.pycharm.mypy.util.Notifications.showWarning;
 import static java.util.Collections.singletonList;
-import static java.util.Optional.ofNullable;
 
-public class MypyInspection extends LocalInspectionTool {
+/**
+ * Using the `ExternalAnnotator` API instead of `LocalInspectionTool`, because the former has better behavior with
+ * long-running expensive checkers like mypy. Following multiple successive changes to a file, `LocalInspectionTool`
+ * can invoke the checker for each modification from multiple threads in parallel, which can bog down the system
+ * (see https://github.com/leinardi/mypy-pycharm/issues/43).
+ * `ExternalAnnotator` cancels the previous running check (if any) before running the next one.
+ * <p>
+ * Modeled after `com.jetbrains.python.validation.Pep8ExternalAnnotator`
+ * <p>
+ * IDE calls methods in three phases:
+ * 1. `State collectInformation(PsiFile)`: preparation.
+ * 2. `Results doAnnotate(State)`: called in the background.
+ * 3. `void apply(PsiFile, Results, AnnotationHolder)`: apply annotations to the editor.
+ */
+public class MypyAnnotator extends ExternalAnnotator<MypyAnnotator.State, MypyAnnotator.Results> {
+    /* Inner classes storing intermediate results */
+    static class State {
+        PsiFile file;
 
-    private static final Logger LOG = Logger.getInstance(MypyInspection.class);
-    private static final List<Problem> NO_PROBLEMS_FOUND = Collections.emptyList();
+        public State(PsiFile file) {
+            this.file = file;
+        }
+    }
+
+    static class Results {
+        List<Problem> issues;
+
+        public Results(List<Problem> issues) {
+            this.issues = issues;
+        }
+    }
+
+    private static final Logger LOG = Logger.getInstance(MypyAnnotator.class);
+    private static final Results NO_PROBLEMS_FOUND = new Results(Collections.emptyList());
     private static final String ERROR_MESSAGE_INVALID_SYNTAX = "invalid syntax";
 
     private MypyPlugin plugin(final Project project) {
@@ -58,20 +89,32 @@ public class MypyInspection extends LocalInspectionTool {
         return mypyPlugin;
     }
 
+    /**
+     * Integration with `MypyBatchInspection`
+     */
     @Override
-    public ProblemDescriptor[] checkFile(@NotNull final PsiFile psiFile,
-                                         @NotNull final InspectionManager manager,
-                                         final boolean isOnTheFly) {
-        return asProblemDescriptors(asyncResultOf(() -> inspectFile(psiFile, manager), NO_PROBLEMS_FOUND),
-                manager);
+    public String getPairedBatchInspectionShortName() {
+        return MypyBatchInspection.INSPECTION_SHORT_NAME;
     }
 
     @Nullable
-    public List<Problem> inspectFile(@NotNull final PsiFile psiFile,
-                                     @NotNull final InspectionManager manager) {
-        LOG.debug("Inspection has been invoked.");
+    @Override
+    public State collectInformation(@NotNull PsiFile file) {
+        LOG.debug("Mypy collectInformation " + file.getName()
+                + " modified=" + file.getModificationStamp()
+                + " thread=" + Thread.currentThread().getName()
+        );
 
-        final MypyPlugin plugin = plugin(manager.getProject());
+        return new State(file);
+    }
+
+    @Nullable
+    @Override
+    public Results doAnnotate(State state) {
+        PsiFile psiFile = state.file;
+        Project project = psiFile.getProject();
+        final MypyPlugin plugin = plugin(project);
+        long startTime = System.currentTimeMillis();
 
         if (!MypyRunner.checkMypyAvailable(plugin.getProject())) {
             LOG.debug("Scan failed: Mypy not available.");
@@ -91,7 +134,10 @@ public class MypyInspection extends LocalInspectionTool {
             if (map.isEmpty()) {
                 return NO_PROBLEMS_FOUND;
             }
-            return map.get(psiFile);
+
+            long duration = System.currentTimeMillis() - startTime;
+            LOG.debug("Mypy scan completed: " + psiFile.getName() + " in " + duration + " ms");
+            return new Results(map.get(psiFile));
 
         } catch (ProcessCanceledException | AssertionError e) {
             LOG.debug("Process cancelled when scanning: " + psiFile.getName());
@@ -102,11 +148,31 @@ public class MypyInspection extends LocalInspectionTool {
             return NO_PROBLEMS_FOUND;
 
         } catch (Throwable e) {
-            handlePluginException(e, psiFile, manager.getProject());
+            handlePluginException(e, psiFile, project);
             return NO_PROBLEMS_FOUND;
 
         } finally {
             scannableFiles.forEach(ScannableFile::deleteIfRequired);
+        }
+    }
+
+    @Override
+    public void apply(@NotNull PsiFile file, Results results, @NotNull AnnotationHolder holder) {
+        if (results == null || !file.isValid()) {
+            return;
+        }
+
+        LOG.debug("Applying " + results.issues.size() + " annotations for " + file.getName());
+
+        // Get severity from inspection profile
+        final InspectionProfile profile =
+                InspectionProjectProfileManager.getInstance(file.getProject()).getCurrentProfile();
+        final HighlightDisplayKey key = HighlightDisplayKey.find(MypyBatchInspection.INSPECTION_SHORT_NAME);
+        HighlightSeverity severity = profile.getErrorLevel(key, file).getSeverity();
+
+        for (Problem problem : results.issues) {
+            LOG.debug("                " + problem.getLine() + ": " + problem.getMessage());
+            problem.createAnnotation(holder, severity);
         }
     }
 
@@ -124,14 +190,5 @@ public class MypyInspection extends LocalInspectionTool {
             LOG.warn("Mypy threw an exception when scanning: " + psiFile.getName(), e);
             showException(project, e);
         }
-    }
-
-    @NotNull
-    private ProblemDescriptor[] asProblemDescriptors(final List<Problem> results, final InspectionManager manager) {
-        return ofNullable(results)
-                .map(problems -> problems.stream()
-                        .map(problem -> problem.toProblemDescriptor(manager))
-                        .toArray(ProblemDescriptor[]::new))
-                .orElse(ProblemDescriptor.EMPTY_ARRAY);
     }
 }
