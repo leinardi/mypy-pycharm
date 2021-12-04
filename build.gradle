@@ -77,6 +77,10 @@ intellij {
     plugins += [pythonPlugin]
 }
 
+runIde {
+    systemProperties.put("idea.log.debug.categories", "#com.leinardi.pycharm.mypy")
+}
+
 patchPluginXml {
     version project.property('version')
     sinceBuild project.property('sinceBuild')
