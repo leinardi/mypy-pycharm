@@ -18,7 +18,7 @@ public class MypyRunnerTest {
     public void testParseWithColon() throws IOException {
         String message = "Dict entry 0 has incompatible type \"int\": \"str\"; expected \"int\": \"int\"  [dict-item]";
         String input = "path/testfile.py:1:22: error: " + message + "\n";
-        Issue parsed = new Issue("path/testfile.py", 1, 22, SeverityLevel.ERROR, message);
+        Issue parsed = new Issue("path/testfile.py", 1, 21, SeverityLevel.ERROR, message);
 
         List<Issue> results = MypyRunner.parseMypyOutput(stringToStream(input));
         Assert.assertArrayEquals(results.toArray(), new Issue[]{parsed});

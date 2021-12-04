@@ -335,7 +335,8 @@ public class MypyRunner {
                     String[] splitPosition = rawLine.substring(0, typeIndexStart - 1).split(":", -1);
                     String path = splitPosition[0].trim();
                     int line = splitPosition.length > 1 ? Integer.parseInt(splitPosition[1].trim()) : 1;
-                    int column = splitPosition.length > 2 ? Integer.parseInt(splitPosition[2].trim()) : 1;
+                    // Mypy uses 1-based column numbers, IntelliJ expects 0-based
+                    int column = splitPosition.length > 2 ? Integer.parseInt(splitPosition[2].trim()) - 1 : 1;
                     String[] splitError = rawLine.substring(typeIndexStart).split(":", 2);
                     SeverityLevel severityLevel = SeverityLevel.valueOf(splitError[0].trim().toUpperCase());
                     String message = splitError[1].trim();
