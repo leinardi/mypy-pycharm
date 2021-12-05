@@ -77,13 +77,15 @@ you can always leave a comment on the [Plugin Repository page](https://plugins.j
 ## Acknowledgements
 _If I have seen further it is by standing on the shoulders of Giants - Isaac Newton_
 
-A huge thank you to the project [CheckStyle-IDEA](https://github.com/jshiell/checkstyle-idea), 
+A huge thanks:
+- to the project [CheckStyle-IDEA](https://github.com/jshiell/checkstyle-idea), 
 which code and architecture I have heavily used when developing this plugin.
-
+- to @intgr, for [the contribution to this project](https://github.com/leinardi/mypy-pycharm/pulls?q=is%3Apr+author%3Aintgr)
+  
 ## License
 
 ```
-Copyright 2018 Roberto Leinardi.
+Copyright 2021 Roberto Leinardi.
 
 Licensed to the Apache Software Foundation (ASF) under one or more contributor
 license agreements.  See the NOTICE file distributed with this work for

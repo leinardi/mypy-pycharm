@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2018 Roberto Leinardi.
+  ~ Copyright 2021 Roberto Leinardi.
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -46,11 +46,16 @@
 
         <projectConfigurable instance="com.leinardi.pycharm.mypy.MypyConfigurable"/>
 
-        <localInspection implementationClass="com.leinardi.pycharm.mypy.MypyInspection"
+        <externalAnnotator language="Python" implementationClass="com.leinardi.pycharm.mypy.MypyAnnotator"/>
+
+        <localInspection implementationClass="com.leinardi.pycharm.mypy.MypyBatchInspection"
+                         language="Python"
                          bundle="com.leinardi.pycharm.mypy.MypyBundle"
                          key="inspection.display-name"
                          groupKey="inspection.group"
+                         shortName="Mypy"
                          level="WARNING"
+                         unfair="true"
                          enabledByDefault="true"/>
 
         <checkinHandlerFactory id="CheckStyleIDEACheckInHandlerFactory"

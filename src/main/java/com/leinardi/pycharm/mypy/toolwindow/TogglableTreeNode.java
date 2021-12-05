@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Roberto Leinardi.
+ * Copyright 2021 Roberto Leinardi.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ package com.leinardi.pycharm.mypy.toolwindow;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
-import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Tree node with togglable visibility.
@@ -44,9 +44,10 @@ public class TogglableTreeNode extends DefaultMutableTreeNode {
         this.visible = visible;
     }
 
-    @SuppressWarnings("unchecked")
     List<TogglableTreeNode> getAllChildren() {
-        return Collections.unmodifiableList(children);
+        return children.stream()
+                .map(child -> (TogglableTreeNode) child)
+                .collect(Collectors.toList());
     }
 
     @Override
