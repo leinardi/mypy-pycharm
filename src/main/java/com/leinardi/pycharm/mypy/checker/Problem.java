@@ -21,6 +21,7 @@ import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.HighlightSeverity;
 import com.intellij.psi.PsiElement;
 import com.leinardi.pycharm.mypy.MypyBundle;
+import com.leinardi.pycharm.mypy.intentions.TypeIgnoreIntention;
 import com.leinardi.pycharm.mypy.mpapi.SeverityLevel;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -56,7 +57,8 @@ public class Problem {
         String message = MypyBundle.message("inspection.message", getMessage());
         AnnotationBuilder annotation = holder
                 .newAnnotation(severity, message)
-                .range(target.getTextRange());
+                .range(target.getTextRange())
+                .withFix(new TypeIgnoreIntention());
         if (isAfterEndOfLine()) {
             annotation = annotation.afterEndOfLine();
         }
