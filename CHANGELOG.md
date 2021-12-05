@@ -1,4 +1,4 @@
-**[0.11.2] 2021-12-05**
+**[0.12.0] 2021-12-05**
 - Fixed #43: Major performance issues with background scanning (a huge thank you to @intgr for fixing this issue!)
 - New: Ability to add suppress comments for Mypy violations via `IntentionAction` (again, thanks to @intgr for the contribution. See #81 for details)
 - New: Min IDEA version raised from 2018 to PC-2021.2.3
