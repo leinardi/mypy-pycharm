@@ -1,3 +1,6 @@
+**[0.12.1] 2021-12-06**
+- New: Minimum compatibility version raised to 201.8743
+
 **[0.12.0] 2021-12-05**
 - Fixed #43: Major performance issues with background scanning (a huge thank you to @intgr for fixing this issue!)
 - New: Ability to add suppress comments for Mypy violations via `IntentionAction` (again, thanks to @intgr for the contribution. See #81 for details)
