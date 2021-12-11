@@ -143,7 +143,7 @@ public class MypyRunner {
             VirtualFile mypyFile = LocalFileSystem.getInstance()
                     .findFileByPath(interpreterFile.getParent().getPath() + File.separator + MYPY_EXECUTABLE_NAME);
             if (mypyFile != null && mypyFile.exists()) {
-                return mypyFile.getPath();
+                return mypyFile.getPresentableUrl();
             }
         } else {
             return detectSystemMypyPath();
