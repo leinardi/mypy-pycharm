@@ -1,3 +1,6 @@
+**[next] 2021-12-11**
+- New: Improved executable auto-detection on Windows
+
 **[0.12.1] 2021-12-06**
 - New: Minimum compatibility version raised to 201.8743
 

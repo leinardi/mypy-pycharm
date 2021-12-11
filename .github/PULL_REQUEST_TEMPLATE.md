@@ -10,6 +10,7 @@ Any HTML comment will be stripped when the markdown is rendered, so you don't ne
 
 ### Contributor checklist
 <!-- replace the empty checkboxes [ ] below with checked ones [x] accordingly -->
+- [ ] I am targeting the `master` branch (and **not** the `release` branch)
 - [ ] I am using the provided [codeStyleConfig.xml](https://github.com/leinardi/mypy-pycharm/blob/release/.idea/codeStyles/codeStyleConfig.xml)
 - [ ] I have tested my contribution on these versions of PyCharm/IDEA:
  * PyCharm Community XXXX.Y.Z
