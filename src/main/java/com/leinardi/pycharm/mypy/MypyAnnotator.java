@@ -82,7 +82,7 @@ public class MypyAnnotator extends ExternalAnnotator<MypyAnnotator.State, MypyAn
     private static final String ERROR_MESSAGE_INVALID_SYNTAX = "invalid syntax";
 
     private MypyPlugin plugin(final Project project) {
-        final MypyPlugin mypyPlugin = project.getComponent(MypyPlugin.class);
+        final MypyPlugin mypyPlugin = project.getService(MypyPlugin.class);
         if (mypyPlugin == null) {
             throw new IllegalStateException("Couldn't get mypy plugin");
         }

@@ -46,7 +46,7 @@ public class ScanCurrentFile extends BaseAction {
 
         try {
             final MypyPlugin mypyPlugin
-                    = project.getComponent(MypyPlugin.class);
+                    = project.getService(MypyPlugin.class);
             if (mypyPlugin == null) {
                 throw new IllegalStateException("Couldn't get mypy plugin");
             }
@@ -59,7 +59,7 @@ public class ScanCurrentFile extends BaseAction {
 
                     final VirtualFile selectedFile = getSelectedFile(project);
                     if (selectedFile != null) {
-                        project.getComponent(MypyPlugin.class).asyncScanFiles(
+                        project.getService(MypyPlugin.class).asyncScanFiles(
                                 Collections.singletonList(selectedFile));
                     }
 
@@ -111,7 +111,7 @@ public class ScanCurrentFile extends BaseAction {
             }
 
             final MypyPlugin mypyPlugin
-                    = project.getComponent(MypyPlugin.class);
+                    = project.getService(MypyPlugin.class);
             if (mypyPlugin == null) {
                 throw new IllegalStateException("Couldn't get mypy plugin");
             }

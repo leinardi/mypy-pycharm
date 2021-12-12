@@ -16,7 +16,7 @@
 
 package com.leinardi.pycharm.mypy;
 
-import com.intellij.openapi.components.ProjectComponent;
+import com.intellij.openapi.components.Service;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -43,12 +43,8 @@ import static com.leinardi.pycharm.mypy.util.Async.whenFinished;
 /**
  * Main class for the Mypy scanning plug-in.
  */
-public final class MypyPlugin implements ProjectComponent {
-
-    /**
-     * The plugin ID. Caution: It must be identical to the String set in build.gradle at intellij.pluginName
-     */
-    public static final String ID_PLUGIN = "Mypy-PyCharm";
+@Service
+public final class MypyPlugin {
 
     private static final Logger LOG = com.intellij.openapi.diagnostic.Logger.getInstance(MypyPlugin.class);
 
@@ -92,22 +88,6 @@ public final class MypyPlugin implements ProjectComponent {
         synchronized (checksInProgress) {
             return !checksInProgress.isEmpty();
         }
-    }
-
-    @Override
-    public void projectOpened() {
-        LOG.debug("Project opened.");
-    }
-
-    @Override
-    public void projectClosed() {
-        LOG.debug("Project closed.");
-    }
-
-    @Override
-    @NotNull
-    public String getComponentName() {
-        return ID_PLUGIN;
     }
 
     public static void processErrorAndLog(@NotNull final String action, @NotNull final Throwable e) {

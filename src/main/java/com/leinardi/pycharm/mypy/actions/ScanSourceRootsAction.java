@@ -34,7 +34,7 @@ class ScanSourceRootsAction implements Runnable {
 
     @Override
     public void run() {
-        project.getComponent(MypyPlugin.class)
+        project.getService(MypyPlugin.class)
                 .asyncScanFiles(VfUtil.filterOnlyPythonProjectFiles(project,
                         VfUtil.flattenFiles(sourceRoots)));
     }
