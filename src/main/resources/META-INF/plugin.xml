@@ -54,7 +54,7 @@
                          key="inspection.display-name"
                          groupKey="inspection.group"
                          shortName="Mypy"
-                         level="WARNING"
+                         level="ERROR"
                          unfair="true"
                          enabledByDefault="true"/>
 
