@@ -31,7 +31,7 @@ buildscript {
 }
 
 plugins {
-    id 'org.jetbrains.intellij' version '0.4.17'
+    id 'org.jetbrains.intellij' version '1.4.0'
     id 'net.ltgt.errorprone' version '2.0.2'
     id 'idea'
     id 'java'
@@ -67,14 +67,14 @@ sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
 intellij {
-    version ideVersion
-    pluginName props.getProperty('plugin.name').toLowerCase().replace(' ', '-')
-    downloadSources Boolean.valueOf(downloadIdeaSources)
+    version = ideVersion
+    pluginName = props.getProperty('plugin.name').toLowerCase().replace(' ', '-')
+    downloadSources = Boolean.valueOf(downloadIdeaSources)
     updateSinceUntilBuild = true
     if (hasPycharmPath) {
-        alternativeIdePath pycharmPath
+        alternativeIdePath = pycharmPath
     }
-    plugins += [pythonPlugin]
+    plugins = [pythonPlugin]
 }
 
 runIde {
@@ -82,17 +82,17 @@ runIde {
 }
 
 patchPluginXml {
-    version project.property('version')
-    sinceBuild project.property('sinceBuild')
-    untilBuild project.property('untilBuild')
-    pluginDescription props.getProperty('plugin.Mypy-PyCharm.description')
-    changeNotes getChangelogHtml()
+    version = project.property('version')
+    sinceBuild = project.property('sinceBuild')
+    untilBuild = project.property('untilBuild')
+    pluginDescription = props.getProperty('plugin.Mypy-PyCharm.description')
+    changeNotes = getChangelogHtml()
 }
 
 publishPlugin {
     def publishToken = project.hasProperty('jetbrainsPublishToken') ? jetbrainsPublishToken : ""
-    token publishToken
-    channels publishChannels
+    token = publishToken
+    channels = [publishChannels]
 }
 
 repositories {
