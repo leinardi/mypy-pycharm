@@ -123,6 +123,14 @@ public final class Notifications {
                 .notify(project);
     }
 
+    public static void showMypyAbnormalExit(final Project project, final String detail) {
+        BALLOON_GROUP
+                .createNotification(TITLE, detail, ERROR)
+                .setListener(URL_OPENING_LISTENER)
+                .setSubtitle(MypyBundle.message("plugin.notification.abnormal-exit.subtitle"))
+                .notify(project);
+    }
+
     public static void showNoPythonInterpreter(Project project) {
         Notification notification = BALLOON_GROUP
                 .createNotification(
