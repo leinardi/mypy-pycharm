@@ -79,6 +79,13 @@ intellij {
 
 runIde {
     systemProperties.put("idea.log.debug.categories", "#com.leinardi.pycharm.mypy")
+    // Log verbose information when dynamic plugin unloading fails
+    systemProperties.put("ide.plugins.snapshot.on.unload.fail", "true")
+}
+
+// Causes error popup when building while sandbox IDE is open. Disable in development
+if (System.getenv('DEVELOP')) {
+    buildSearchableOptions.enabled = false
 }
 
 patchPluginXml {

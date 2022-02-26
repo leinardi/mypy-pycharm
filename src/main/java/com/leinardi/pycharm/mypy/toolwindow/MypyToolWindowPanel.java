@@ -130,7 +130,7 @@ public class MypyToolWindowPanel extends JPanel {
         this.toolWindow = toolWindow;
         this.project = project;
 
-        mypyPlugin = project.getComponent(MypyPlugin.class);
+        mypyPlugin = project.getService(MypyPlugin.class);
         if (mypyPlugin == null) {
             throw new IllegalStateException("Couldn't get mypy plugin");
         }

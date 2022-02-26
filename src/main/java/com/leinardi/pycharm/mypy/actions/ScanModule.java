@@ -58,7 +58,7 @@ public class ScanModule extends BaseAction {
             }
 
             final MypyPlugin mypyPlugin
-                    = project.getComponent(MypyPlugin.class);
+                    = project.getService(MypyPlugin.class);
             if (mypyPlugin == null) {
                 throw new IllegalStateException("Couldn't get mypy plugin");
             }
@@ -107,7 +107,7 @@ public class ScanModule extends BaseAction {
             }
 
             final MypyPlugin mypyPlugin
-                    = project.getComponent(MypyPlugin.class);
+                    = project.getService(MypyPlugin.class);
             if (mypyPlugin == null) {
                 throw new IllegalStateException("Couldn't get mypy plugin");
             }

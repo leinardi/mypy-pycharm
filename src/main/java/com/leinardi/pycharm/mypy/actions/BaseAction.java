@@ -59,7 +59,7 @@ public abstract class BaseAction extends AnAction {
                 return;
             }
 
-            final MypyPlugin mypyPlugin = project.getComponent(MypyPlugin.class);
+            final MypyPlugin mypyPlugin = project.getService(MypyPlugin.class);
             if (mypyPlugin == null) {
                 throw new IllegalStateException("Couldn't get mypy plugin");
             }

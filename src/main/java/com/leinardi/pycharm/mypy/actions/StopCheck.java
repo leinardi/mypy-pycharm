@@ -39,7 +39,7 @@ public class StopCheck extends BaseAction {
 
         try {
             final MypyPlugin mypyPlugin
-                    = project.getComponent(MypyPlugin.class);
+                    = project.getService(MypyPlugin.class);
             if (mypyPlugin == null) {
                 throw new IllegalStateException("Couldn't get mypy plugin");
             }
@@ -70,7 +70,7 @@ public class StopCheck extends BaseAction {
             }
 
             final MypyPlugin mypyPlugin
-                    = project.getComponent(MypyPlugin.class);
+                    = project.getService(MypyPlugin.class);
             if (mypyPlugin == null) {
                 throw new IllegalStateException("Couldn't get mypy plugin");
             }

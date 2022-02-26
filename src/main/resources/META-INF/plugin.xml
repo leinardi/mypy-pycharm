@@ -28,13 +28,6 @@
 
     <resource-bundle>com.leinardi.pycharm.mypy.MypyBundle</resource-bundle>
 
-    <project-components>
-        <component>
-            <implementation-class>com.leinardi.pycharm.mypy.MypyPlugin</implementation-class>
-            <interface-class>com.leinardi.pycharm.mypy.MypyPlugin</interface-class>
-        </component>
-    </project-components>
-
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow id="Mypy"
                     anchor="bottom"
@@ -42,8 +35,7 @@
                     factoryClass="com.leinardi.pycharm.mypy.toolwindow.MypyToolWindowFactory"
                     icon="/com/leinardi/pycharm/mypy/images/mypy.png"/>
 
-        <projectService serviceInterface="com.leinardi.pycharm.mypy.MypyConfigService"
-                        serviceImplementation="com.leinardi.pycharm.mypy.MypyConfigService"/>
+        <projectService serviceImplementation="com.leinardi.pycharm.mypy.MypyConfigService"/>
 
         <projectConfigurable instance="com.leinardi.pycharm.mypy.MypyConfigurable"/>
 
