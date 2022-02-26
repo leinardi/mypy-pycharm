@@ -302,14 +302,29 @@ public class MypyRunner {
         }
         cmd.setWorkDirectory(project.getBasePath());
         final Process process;
+
         try {
             LOG.info("Running command: " + cmd.getCommandLineString());
             process = cmd.createProcess();
             InputStream inputStream = process.getInputStream();
             assert (inputStream != null);
-            //TODO check stderr for errors
-            //            process.waitFor();
-            return parseMypyOutput(inputStream);
+
+            List<Issue> issues = parseMypyOutput(inputStream);
+            process.waitFor();
+
+            // Anything other than 0 and 1 is an abnormal exit code
+            // See https://github.com/python/mypy/issues/6003
+            int exitCode = process.exitValue();
+            if (exitCode != 0 && exitCode != 1) {
+                InputStream errStream = process.getErrorStream();
+                String detail = new BufferedReader(new InputStreamReader(errStream))
+                        .lines().collect(Collectors.joining("\n"));
+
+                Notifications.showMypyAbnormalExit(project, detail);
+                throw new MypyToolException("Mypy failed with code " + exitCode);
+            }
+            return issues;
+
         } catch (InterruptedIOException e) {
             LOG.info("Command Line string: " + cmd.getCommandLineString());
             throw e;

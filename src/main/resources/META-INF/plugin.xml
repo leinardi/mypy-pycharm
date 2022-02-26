@@ -26,6 +26,8 @@
     <!--suppress PluginXmlValidity -->
     <depends>com.intellij.modules.python</depends>
 
+    <resource-bundle>com.leinardi.pycharm.mypy.MypyBundle</resource-bundle>
+
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow id="Mypy"
                     anchor="bottom"
@@ -41,7 +43,6 @@
 
         <localInspection implementationClass="com.leinardi.pycharm.mypy.MypyBatchInspection"
                          language="Python"
-                         bundle="com.leinardi.pycharm.mypy.MypyBundle"
                          key="inspection.display-name"
                          groupKey="inspection.group"
                          shortName="Mypy"
@@ -51,6 +52,9 @@
 
         <checkinHandlerFactory id="CheckStyleIDEACheckInHandlerFactory"
                                implementation="com.leinardi.pycharm.mypy.handlers.ScanFilesBeforeCheckinHandlerFactory"/>
+
+        <notificationGroup id="alerts" displayType="BALLOON" key="plugin.notification.alerts"/>
+        <notificationGroup id="logging" displayType="NONE" key="plugin.notification.logging"/>
     </extensions>
 
     <actions>
