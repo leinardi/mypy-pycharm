@@ -39,7 +39,7 @@ public final class ScrollToSource extends ToggleAction {
         }
 
         final MypyPlugin mypyPlugin
-                = project.getComponent(MypyPlugin.class);
+                = project.getService(MypyPlugin.class);
         if (mypyPlugin == null) {
             throw new IllegalStateException("Couldn't get mypy plugin");
         }
@@ -63,7 +63,7 @@ public final class ScrollToSource extends ToggleAction {
         }
 
         final MypyPlugin mypyPlugin
-                = project.getComponent(MypyPlugin.class);
+                = project.getService(MypyPlugin.class);
         if (mypyPlugin == null) {
             throw new IllegalStateException("Couldn't get mypy plugin");
         }

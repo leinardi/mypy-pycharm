@@ -101,7 +101,7 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
             return COMMIT;
         }
 
-        final MypyPlugin plugin = project.getComponent(MypyPlugin.class);
+        final MypyPlugin plugin = project.getService(MypyPlugin.class);
         if (plugin == null) {
             LOG.warn("Could not get Mypy Plug-in, skipping");
             return COMMIT;

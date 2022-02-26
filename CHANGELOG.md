@@ -1,5 +1,9 @@
-**[next] 2021-12-11**
+**[0.14.0] 2022-02-26**
+- Change default inspection level to ERROR (thanks to @intgr)
+- New: Make plugin hot-reloadable (thanks to @intgr)
+- New: Show notification when Mypy exits abnormally (thanks to @intgr)
 - New: Improved executable auto-detection on Windows
+- Several dependency updates
 
 **[0.12.1] 2021-12-06**
 - New: Minimum compatibility version raised to 201.8743

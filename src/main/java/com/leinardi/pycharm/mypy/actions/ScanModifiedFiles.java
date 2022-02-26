@@ -47,7 +47,7 @@ public class ScanModifiedFiles extends BaseAction {
             }
 
             final ChangeListManager changeListManager = ChangeListManager.getInstance(project);
-            project.getComponent(MypyPlugin.class).asyncScanFiles(
+            project.getService(MypyPlugin.class).asyncScanFiles(
                     VfUtil.filterOnlyPythonProjectFiles(project, changeListManager.getAffectedFiles())
             );
         } catch (Throwable e) {
@@ -66,7 +66,7 @@ public class ScanModifiedFiles extends BaseAction {
                 return;
             }
 
-            final MypyPlugin mypyPlugin = project.getComponent(MypyPlugin.class);
+            final MypyPlugin mypyPlugin = project.getService(MypyPlugin.class);
             if (mypyPlugin == null) {
                 throw new IllegalStateException("Couldn't get mypy plugin");
             }
