@@ -164,7 +164,13 @@ public class MypyRunner {
                 Notifications.showNoPythonInterpreter(project);
             }
             return false;
-        } else if (showNotifications) {
+        }
+        MypyConfigService mypyConfigService = MypyConfigService.getInstance(project);
+        if (mypyConfigService == null) {
+            throw new IllegalStateException("MypyConfigService is null");
+        }
+        String mypyPath = getMypyPath(project);
+        if (mypyPath.isEmpty() && showNotifications) {
             PyPackageManager pyPackageManager = PyPackageManager.getInstance(projectSdk);
             List<PyPackage> packages = pyPackageManager.getPackages();
             if (packages != null) {
@@ -174,11 +180,6 @@ public class MypyRunner {
                 }
             }
         }
-        MypyConfigService mypyConfigService = MypyConfigService.getInstance(project);
-        if (mypyConfigService == null) {
-            throw new IllegalStateException("MypyConfigService is null");
-        }
-        String mypyPath = getMypyPath(project);
         boolean isMypyPathValid = !mypyPath.isEmpty() && isMypyPathValid(mypyPath, project);
         if (showNotifications && !isMypyPathValid) {
             Notifications.showUnableToRunMypy(project);
