@@ -312,16 +312,22 @@ public class MypyRunner {
             List<Issue> issues = parseMypyOutput(inputStream);
             process.waitFor();
 
-            // Anything other than 0 and 1 is an abnormal exit code
-            // See https://github.com/python/mypy/issues/6003
             int exitCode = process.exitValue();
             if (exitCode != 0 && exitCode != 1) {
-                InputStream errStream = process.getErrorStream();
-                String detail = new BufferedReader(new InputStreamReader(errStream))
-                        .lines().collect(Collectors.joining("\n"));
+                // Ideally, anything other than 0 or 1 should be an abnormal exit code,
+                // but there are still cases where Mypy returns 2 and still reports errors
+                // (e.g. syntax errors or "break" outside loop).
+                // See https://github.com/python/mypy/issues/6003.
+                if (issues.size() == 0) {
+                    InputStream errStream = process.getErrorStream();
+                    String detail = new BufferedReader(new InputStreamReader(errStream))
+                            .lines().collect(Collectors.joining("\n"));
 
-                Notifications.showMypyAbnormalExit(project, detail);
-                throw new MypyToolException("Mypy failed with code " + exitCode);
+                    Notifications.showMypyAbnormalExit(project, detail);
+                    throw new MypyToolException("Mypy failed with code " + exitCode);
+                } else {
+                    LOG.info("Mypy returned " + exitCode + ", but also reported issues");
+                }
             }
             return issues;
 
