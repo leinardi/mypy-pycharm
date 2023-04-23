@@ -16,6 +16,7 @@
 
 package com.leinardi.pycharm.mypy.toolwindow;
 
+import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
@@ -24,7 +25,7 @@ import com.intellij.ui.content.Content;
 import com.leinardi.pycharm.mypy.MypyBundle;
 import org.jetbrains.annotations.NotNull;
 
-public class MypyToolWindowFactory implements ToolWindowFactory {
+public class MypyToolWindowFactory implements ToolWindowFactory, DumbAware {
 
     @Override
     public void createToolWindowContent(@NotNull final Project project, @NotNull final ToolWindow toolWindow) {

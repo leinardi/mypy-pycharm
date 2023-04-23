@@ -19,6 +19,7 @@ package com.leinardi.pycharm.mypy.actions;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.actionSystem.ToggleAction;
+import com.intellij.openapi.project.DumbAwareToggleAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
@@ -29,7 +30,7 @@ import com.leinardi.pycharm.mypy.toolwindow.MypyToolWindowPanel;
 /**
  * Action to toggle error display in tool window.
  */
-public class DisplayErrors extends ToggleAction {
+public class DisplayErrors extends DumbAwareToggleAction {
 
     @Override
     public boolean isSelected(final AnActionEvent event) {

@@ -21,6 +21,7 @@ import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.editor.LogicalPosition;
 import com.intellij.openapi.editor.ScrollType;
 import com.intellij.openapi.fileEditor.FileEditor;
@@ -74,7 +75,7 @@ import static org.apache.commons.lang.StringUtils.isBlank;
 /**
  * The tool window for Mypy scans.
  */
-public class MypyToolWindowPanel extends JPanel {
+public class MypyToolWindowPanel extends JPanel implements DumbAware {
 
     public static final String ID_TOOLWINDOW = "Mypy";
 
