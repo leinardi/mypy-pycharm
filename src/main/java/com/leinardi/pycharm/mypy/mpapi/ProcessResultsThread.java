@@ -20,6 +20,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiInvalidElementAccessException;
+import com.intellij.util.ThrowableRunnable;
 import com.leinardi.pycharm.mypy.checker.Problem;
 import org.jetbrains.annotations.NotNull;
 
@@ -32,7 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ProcessResultsThread implements Runnable {
+public class ProcessResultsThread implements ThrowableRunnable<RuntimeException> {
 
     private static final Logger LOG = Logger.getInstance(ProcessResultsThread.class);
 

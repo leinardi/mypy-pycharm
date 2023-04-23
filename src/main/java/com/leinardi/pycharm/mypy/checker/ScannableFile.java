@@ -17,11 +17,11 @@
 package com.leinardi.pycharm.mypy.checker;
 
 import com.intellij.application.options.CodeStyle;
-import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.ProjectUtil;
-import com.intellij.openapi.util.Computable;
+import com.intellij.openapi.util.ThrowableComputable;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
@@ -88,19 +88,19 @@ public class ScannableFile {
     public static List<ScannableFile> createAndValidate(@NotNull final Collection<PsiFile> psiFiles,
                                                         @NotNull final MypyPlugin plugin/*,
                                                         @Nullable final Module module*/) {
-        Computable<List<ScannableFile>> action = () -> psiFiles.stream()
+        ThrowableComputable<List<ScannableFile>, RuntimeException> action = () -> psiFiles.stream()
                 .filter(currentFile -> PsiFileValidator.isScannable(currentFile, plugin.getProject()))
                 .map(ScannableFile::create)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toCollection(CopyOnWriteArrayList::new));
-        return ApplicationManager.getApplication().runReadAction(action);
+        return ReadAction.compute(action);
     }
 
     @Nullable
     private static ScannableFile create(@NotNull final PsiFile psiFile) {
         try {
             final CreateScannableFileAction fileAction = new CreateScannableFileAction(psiFile);
-            ApplicationManager.getApplication().runReadAction(fileAction);
+            ReadAction.run(fileAction);
 
             //noinspection ThrowableResultOfMethodCallIgnored
             if (fileAction.getFailure() != null) {

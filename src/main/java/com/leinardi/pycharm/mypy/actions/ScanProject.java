@@ -18,11 +18,12 @@ package com.leinardi.pycharm.mypy.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
-import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
+import com.intellij.util.ThrowableRunnable;
 import com.leinardi.pycharm.mypy.MypyPlugin;
 import com.leinardi.pycharm.mypy.toolwindow.MypyToolWindowPanel;
 import org.jetbrains.annotations.NotNull;
@@ -46,7 +47,7 @@ public class ScanProject extends BaseAction {
                 toolWindow.activate(() -> {
                     try {
                         setProgressText(toolWindow, "plugin.status.in-progress.project");
-                        Runnable scanAction;
+                        ThrowableRunnable<RuntimeException> scanAction;
                         //                                        if (scope == ScanScope.Everything) {
                         scanAction = new ScanEverythingAction(project);
                         //                    } else {
@@ -60,7 +61,7 @@ public class ScanProject extends BaseAction {
                         //                    }
                         //                    }
                         //                    if (scanAction != null) {
-                        ApplicationManager.getApplication().runReadAction(scanAction);
+                        ReadAction.run(scanAction);
                         //                    }
                     } catch (Throwable e) {
                         MypyPlugin.processErrorAndLog("Project scan", e);

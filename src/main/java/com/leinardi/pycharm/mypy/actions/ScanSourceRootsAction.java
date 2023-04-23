@@ -18,11 +18,12 @@ package com.leinardi.pycharm.mypy.actions;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.util.ThrowableRunnable;
 import com.leinardi.pycharm.mypy.MypyPlugin;
 import com.leinardi.pycharm.mypy.util.VfUtil;
 import org.jetbrains.annotations.NotNull;
 
-class ScanSourceRootsAction implements Runnable {
+class ScanSourceRootsAction implements ThrowableRunnable<RuntimeException> {
     private final Project project;
     private final VirtualFile[] sourceRoots;
 

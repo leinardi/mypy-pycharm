@@ -18,13 +18,14 @@ package com.leinardi.pycharm.mypy.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
-import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
+import com.intellij.util.ThrowableRunnable;
 import com.leinardi.pycharm.mypy.MypyPlugin;
 import com.leinardi.pycharm.mypy.util.VfUtil;
 import org.jetbrains.annotations.NotNull;
@@ -57,9 +58,9 @@ public class ScanModule extends BaseAction {
 
                         List<VirtualFile> moduleFiles = VfUtil.filterOnlyPythonProjectFiles(
                                 project, VfUtil.flattenFiles(new VirtualFile[]{selectedFiles[0].getParent()}));
-                        Runnable scanAction = new ScanSourceRootsAction(project,
+                        ThrowableRunnable<RuntimeException> scanAction = new ScanSourceRootsAction(project,
                                 moduleFiles.toArray(new VirtualFile[0]));
-                        ApplicationManager.getApplication().runReadAction(scanAction);
+                        ReadAction.run(scanAction);
                     } catch (Throwable e) {
                         MypyPlugin.processErrorAndLog("Current Module scan", e);
                     }
