@@ -16,9 +16,10 @@
 
 package com.leinardi.pycharm.mypy.toolwindow;
 
+import com.intellij.ui.JBColor;
+
 import javax.swing.JLabel;
 import javax.swing.JTree;
-import javax.swing.UIManager;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeCellRenderer;
 import java.awt.Component;
@@ -53,7 +54,7 @@ public class ResultTreeRenderer extends JLabel
         g.fillRect(offset, 0, getWidth() - 1 - offset, getHeight() - 1);
 
         if (selected) {
-            g.setColor(UIManager.getColor("Tree.selectionBorderColor"));
+            g.setColor(JBColor.getColor("Tree.selectionBorderColor"));
             g.drawRect(offset, 0, getWidth() - 1 - offset, getHeight() - 1);
         }
 
@@ -98,9 +99,9 @@ public class ResultTreeRenderer extends JLabel
             setFont(tree.getFont());
         }
 
-        setForeground(UIManager.getColor(selected
+        setForeground(JBColor.getColor(selected
                 ? "Tree.selectionForeground" : "Tree.textForeground"));
-        setBackground(UIManager.getColor(selected
+        setBackground(JBColor.getColor(selected
                 ? "Tree.selectionBackground" : "Tree.textBackground"));
 
         return this;

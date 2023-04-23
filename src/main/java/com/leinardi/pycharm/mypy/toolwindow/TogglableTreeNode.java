@@ -62,7 +62,7 @@ public class TogglableTreeNode extends DefaultMutableTreeNode {
             }
             ++realIndex;
             if (visibleIndex == index) {
-                return (TreeNode) children.get(realIndex);
+                return children.get(realIndex);
             }
         }
 
