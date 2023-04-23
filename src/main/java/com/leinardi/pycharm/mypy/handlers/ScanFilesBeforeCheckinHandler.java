@@ -77,10 +77,6 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
             }
 
             @Override
-            public void refresh() {
-            }
-
-            @Override
             public void saveState() {
                 mypyConfigService.setScanBeforeCheckin(checkBox.isSelected());
             }

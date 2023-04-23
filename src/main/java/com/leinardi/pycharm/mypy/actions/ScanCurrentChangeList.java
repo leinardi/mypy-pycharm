@@ -17,20 +17,18 @@
 package com.leinardi.pycharm.mypy.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vcs.changes.Change;
 import com.intellij.openapi.vcs.changes.ChangeListManager;
 import com.intellij.openapi.vcs.changes.LocalChangeList;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.leinardi.pycharm.mypy.MypyPlugin;
 import com.leinardi.pycharm.mypy.util.VfUtil;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
@@ -42,26 +40,22 @@ public class ScanCurrentChangeList extends BaseAction {
     private static final Logger LOG = Logger.getInstance(ScanCurrentChangeList.class);
 
     @Override
-    public final void actionPerformed(final AnActionEvent event) {
-        Project project;
-        try {
-            project = PlatformDataKeys.PROJECT.getData(event.getDataContext());
-            if (project == null) {
-                return;
+    public final void actionPerformed(final @NotNull AnActionEvent event) {
+        project(event).ifPresent(project -> {
+            try {
+                final ChangeListManager changeListManager = ChangeListManager.getInstance(project);
+                project.getService(MypyPlugin.class)
+                        .asyncScanFiles(VfUtil.filterOnlyPythonProjectFiles(project,
+                                filesFor(changeListManager.getDefaultChangeList())));
+            } catch (Throwable e) {
+                LOG.warn("Modified files scan failed", e);
             }
-
-            final ChangeListManager changeListManager = ChangeListManager.getInstance(project);
-            project.getService(MypyPlugin.class)
-                    .asyncScanFiles(VfUtil.filterOnlyPythonProjectFiles(project,
-                            filesFor(changeListManager.getDefaultChangeList())));
-        } catch (Throwable e) {
-            LOG.warn("Modified files scan failed", e);
-        }
+        });
     }
 
     private List<VirtualFile> filesFor(final LocalChangeList changeList) {
         if (changeList == null || changeList.getChanges() == null) {
-            return Collections.emptyList();
+            return new ArrayList<>();
         }
 
         final Collection<VirtualFile> filesInChanges = new HashSet<>();
@@ -76,30 +70,24 @@ public class ScanCurrentChangeList extends BaseAction {
 
     @Override
     public void update(final AnActionEvent event) {
-        super.update(event);
+        final Presentation presentation = event.getPresentation();
 
-        Project project;
-        try {
-            project = PlatformDataKeys.PROJECT.getData(event.getDataContext());
-            if (project == null) { // check if we're loading...
-                return;
+        project(event).ifPresentOrElse(project -> {
+            try {
+                final MypyPlugin mypyPlugin = project.getService(MypyPlugin.class);
+                if (mypyPlugin == null) {
+                    throw new IllegalStateException("Couldn't get mypy plugin");
+                }
+
+                final LocalChangeList changeList = ChangeListManager.getInstance(project).getDefaultChangeList();
+                if (changeList.getChanges() == null || changeList.getChanges().isEmpty()) {
+                    presentation.setEnabled(false);
+                } else {
+                    presentation.setEnabled(!mypyPlugin.isScanInProgress());
+                }
+            } catch (Throwable e) {
+                LOG.warn("Button update failed.", e);
             }
-
-            final MypyPlugin mypyPlugin = project.getService(MypyPlugin.class);
-            if (mypyPlugin == null) {
-                throw new IllegalStateException("Couldn't get mypy plugin");
-            }
-
-            final Presentation presentation = event.getPresentation();
-
-            final LocalChangeList changeList = ChangeListManager.getInstance(project).getDefaultChangeList();
-            if (changeList.getChanges() == null || changeList.getChanges().size() == 0) {
-                presentation.setEnabled(false);
-            } else {
-                presentation.setEnabled(!mypyPlugin.isScanInProgress());
-            }
-        } catch (Throwable e) {
-            LOG.warn("Button update failed.", e);
-        }
+        }, () -> presentation.setEnabled(false));
     }
 }

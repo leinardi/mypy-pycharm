@@ -47,7 +47,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -232,7 +231,7 @@ public class MypyRunner {
     public static List<Issue> scan(Project project, Set<String> filesToScan)
             throws InterruptedIOException, InterruptedException {
         if (!checkMypyAvailable(project, true)) {
-            return Collections.emptyList();
+            return new ArrayList<>();
         }
         MypyConfigService mypyConfigService = MypyConfigService.getInstance(project);
         if (filesToScan.isEmpty()) {
@@ -271,12 +270,12 @@ public class MypyRunner {
                                        String mypyConfigFilePath, MypyConfigService mypyConfigService)
             throws InterruptedIOException, InterruptedException {
         if (filesToScan.isEmpty()) {
-            return Collections.emptyList();
+            return new ArrayList<>();
         }
         boolean daemon = false;
 
         GeneralCommandLine cmd = new GeneralCommandLine(mypyPath);
-        cmd.setCharset(Charset.forName("UTF-8"));
+        cmd.setCharset(UTF_8);
         if (daemon) {
             cmd.addParameter("run");
             cmd.addParameter("--");
@@ -320,7 +319,7 @@ public class MypyRunner {
                 // See https://github.com/python/mypy/issues/6003.
                 if (issues.size() == 0) {
                     InputStream errStream = process.getErrorStream();
-                    String detail = new BufferedReader(new InputStreamReader(errStream))
+                    String detail = new BufferedReader(new InputStreamReader(errStream, UTF_8))
                             .lines().collect(Collectors.joining("\n"));
 
                     Notifications.showMypyAbnormalExit(project, detail);

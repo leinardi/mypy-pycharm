@@ -19,14 +19,16 @@ package com.leinardi.pycharm.mypy.toolwindow;
 import com.intellij.openapi.actionSystem.ActionGroup;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionToolbar;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.editor.LogicalPosition;
 import com.intellij.openapi.editor.ScrollType;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.TextEditor;
+import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
@@ -50,7 +52,6 @@ import javax.swing.JProgressBar;
 import javax.swing.JToolBar;
 import javax.swing.JTree;
 import javax.swing.ToolTipManager;
-import javax.swing.UIManager;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -86,8 +87,6 @@ public class MypyToolWindowPanel extends JPanel implements DumbAware {
 
     private static final String MAIN_ACTION_GROUP = "MypyPluginActions";
     private static final String TREE_ACTION_GROUP = "MypyPluginTreeActions";
-    private static final String DEFAULT_OVERRIDE = MypyBundle.message("plugin.toolwindow.default-file");
-
     private static final Map<Pattern, String> MYPY_ERROR_PATTERNS
             = new HashMap<>();
 
@@ -97,7 +96,7 @@ public class MypyToolWindowPanel extends JPanel implements DumbAware {
 
     private boolean displayingErrors = true;
     private boolean displayingWarnings = true;
-    private boolean displayingNote = true;
+    private boolean displayingNotes = true;
 
     private JTree resultsTree;
     private JToolBar progressPanel;
@@ -140,11 +139,13 @@ public class MypyToolWindowPanel extends JPanel implements DumbAware {
                 ActionManager.getInstance().getAction(MAIN_ACTION_GROUP);
         final ActionToolbar mainToolbar = ActionManager.getInstance().createActionToolbar(
                 ID_TOOLWINDOW, mainActionGroup, false);
+        mainToolbar.setTargetComponent(this);
 
         final ActionGroup treeActionGroup = (ActionGroup)
                 ActionManager.getInstance().getAction(TREE_ACTION_GROUP);
         final ActionToolbar treeToolbar = ActionManager.getInstance().createActionToolbar(
                 ID_TOOLWINDOW, treeActionGroup, false);
+        treeToolbar.setTargetComponent(this);
 
         final Box toolBarBox = Box.createHorizontalBox();
         toolBarBox.add(mainToolbar.getComponent());
@@ -187,7 +188,7 @@ public class MypyToolWindowPanel extends JPanel implements DumbAware {
         progressPanel.add(progressLabel);
         progressPanel.add(Box.createHorizontalGlue());
         progressPanel.setFloatable(false);
-        progressPanel.setBackground(UIManager.getColor("Panel.background"));
+        progressPanel.setOpaque(false);
         progressPanel.setBorder(null);
 
         final JPanel toolPanel = new JPanel(new BorderLayout());
@@ -311,25 +312,27 @@ public class MypyToolWindowPanel extends JPanel implements DumbAware {
         }
 
         final FileEditorManager fileEditorManager = FileEditorManager.getInstance(project);
-        final FileEditor[] editor = fileEditorManager.openFile(
-                virtualFile, true);
+        ApplicationManager.getApplication().invokeLater(() -> {
+            final FileEditor[] editor = fileEditorManager.openFile(
+                    virtualFile, true);
 
-        if (editor.length > 0 && editor[0] instanceof TextEditor) {
-            final LogicalPosition problemPos = new LogicalPosition(
-                    Math.max(lineFor(nodeInfo) - 1, 0), Math.max(columnFor(nodeInfo), 0));
+            if (editor.length > 0 && editor[0] instanceof TextEditor) {
+                final LogicalPosition problemPos = new LogicalPosition(
+                        Math.max(lineFor(nodeInfo) - 1, 0), Math.max(columnFor(nodeInfo), 0));
 
-            final Editor textEditor = ((TextEditor) editor[0]).getEditor();
-            textEditor.getCaretModel().moveToLogicalPosition(problemPos);
-            textEditor.getScrollingModel().scrollToCaret(ScrollType.CENTER);
-        }
+                final Editor textEditor = ((TextEditor) editor[0]).getEditor();
+                textEditor.getCaretModel().moveToLogicalPosition(problemPos);
+                textEditor.getScrollingModel().scrollToCaret(ScrollType.CENTER);
+            }
+        }, ModalityState.NON_MODAL);
     }
 
     private int lineFor(final ResultTreeNode nodeInfo) {
-        return nodeInfo.getProblem().getLine();
+        return nodeInfo.getProblem().line();
     }
 
     private int columnFor(final ResultTreeNode nodeInfo) {
-        return nodeInfo.getProblem().getColumn();
+        return nodeInfo.getProblem().column();
     }
 
     /**
@@ -527,7 +530,7 @@ public class MypyToolWindowPanel extends JPanel implements DumbAware {
         if (displayingWarnings) {
             severityLevels.add(SeverityLevel.WARNING);
         }
-        if (displayingNote) {
+        if (displayingNotes) {
             severityLevels.add(SeverityLevel.NOTE);
         }
         return severityLevels.toArray(new SeverityLevel[0]);
@@ -573,12 +576,12 @@ public class MypyToolWindowPanel extends JPanel implements DumbAware {
         this.displayingWarnings = displayingWarnings;
     }
 
-    public boolean isDisplayingNote() {
-        return displayingNote;
+    public boolean isDisplayingNotes() {
+        return displayingNotes;
     }
 
-    public void setDisplayingNote(final boolean displayingNote) {
-        this.displayingNote = displayingNote;
+    public void setDisplayingNotes(final boolean displayingNotes) {
+        this.displayingNotes = displayingNotes;
     }
 
 }

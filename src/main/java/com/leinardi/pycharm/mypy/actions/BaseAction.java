@@ -16,26 +16,23 @@
 
 package com.leinardi.pycharm.mypy.actions;
 
-import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileVisitor;
 import com.intellij.openapi.wm.ToolWindow;
-import com.intellij.openapi.wm.ToolWindowManager;
-import com.intellij.ui.content.Content;
 import com.leinardi.pycharm.mypy.MypyBundle;
 import com.leinardi.pycharm.mypy.MypyPlugin;
-import com.leinardi.pycharm.mypy.toolwindow.MypyToolWindowPanel;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.JComponent;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.intellij.openapi.actionSystem.CommonDataKeys.PROJECT;
+import static com.leinardi.pycharm.mypy.actions.ToolWindowAccess.actOnToolWindowPanel;
 import static java.util.Optional.ofNullable;
 
 /**
@@ -47,9 +44,8 @@ public abstract class BaseAction extends DumbAwareAction {
 
     @Override
     public void update(final @NotNull AnActionEvent event) {
-        Project project;
         try {
-            project = PlatformDataKeys.PROJECT.getData(event.getDataContext());
+            final Project project = getEventProject(event);
             final Presentation presentation = event.getPresentation();
 
             // check a project is loaded
@@ -66,8 +62,7 @@ public abstract class BaseAction extends DumbAwareAction {
             }
 
             // check if tool window is registered
-            final ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow(
-                    MypyToolWindowPanel.ID_TOOLWINDOW);
+            final ToolWindow toolWindow = ToolWindowAccess.toolWindow(project);
             if (toolWindow == null) {
                 presentation.setEnabled(false);
                 presentation.setVisible(false);
@@ -84,30 +79,31 @@ public abstract class BaseAction extends DumbAwareAction {
     }
 
     protected void setProgressText(final ToolWindow toolWindow, final String progressTextKey) {
-        final Content content = toolWindow.getContentManager().getContent(0);
-        if (content != null) {
-            final JComponent component = content.getComponent();
-            // the content instance will be a JLabel while the component initialises
-            if (component instanceof MypyToolWindowPanel) {
-                final MypyToolWindowPanel panel = (MypyToolWindowPanel) component;
-                panel.setProgressText(MypyBundle.message(progressTextKey));
-            }
-        }
+        actOnToolWindowPanel(toolWindow, panel -> panel.setProgressText(MypyBundle.message(progressTextKey)));
     }
 
     protected Optional<Project> project(@NotNull final AnActionEvent event) {
-        return ofNullable(PROJECT.getData(event.getDataContext()));
+        return ofNullable(getEventProject(event));
     }
 
-    boolean containsAtLeastOneFile(@NotNull final VirtualFile... files) {
-        boolean result = false;
+    protected boolean containsAtLeastOneFile(@NotNull final VirtualFile... files) {
+        final var result = new AtomicBoolean(false);
         for (VirtualFile file : files) {
-            if ((file.isDirectory() && containsAtLeastOneFile(file.getChildren())) || (!file.isDirectory() && file
-                    .isValid())) {
-                result = true;
+            VfsUtilCore.visitChildrenRecursively(file, new VirtualFileVisitor<>() {
+                @Override
+                public @NotNull Result visitFileEx(@NotNull final VirtualFile file) {
+                    if (!file.isDirectory() && file.isValid()) {
+                        result.set(true);
+                        return SKIP_CHILDREN;
+                    }
+                    return CONTINUE;
+                }
+            });
+
+            if (result.get()) {
                 break;
             }
         }
-        return result;
+        return result.get();
     }
 }

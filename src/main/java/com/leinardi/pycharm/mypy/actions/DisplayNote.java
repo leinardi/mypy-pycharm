@@ -18,14 +18,16 @@ package com.leinardi.pycharm.mypy.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
-import com.intellij.openapi.actionSystem.ToggleAction;
 import com.intellij.openapi.project.DumbAwareToggleAction;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.wm.ToolWindow;
-import com.intellij.openapi.wm.ToolWindowManager;
-import com.intellij.ui.content.Content;
-import com.leinardi.pycharm.mypy.MypyPlugin;
 import com.leinardi.pycharm.mypy.toolwindow.MypyToolWindowPanel;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
+
+import static com.leinardi.pycharm.mypy.actions.ToolWindowAccess.actOnToolWindowPanel;
+import static com.leinardi.pycharm.mypy.actions.ToolWindowAccess.getFromToolWindowPanel;
+import static com.leinardi.pycharm.mypy.actions.ToolWindowAccess.toolWindow;
 
 /**
  * Action to toggle error display in tool window.
@@ -39,44 +41,21 @@ public class DisplayNote extends DumbAwareToggleAction {
             return false;
         }
 
-        final MypyPlugin mypyPlugin
-                = project.getService(MypyPlugin.class);
-        if (mypyPlugin == null) {
-            throw new IllegalStateException("Couldn't get mypy plugin");
-        }
-
-        final ToolWindow toolWindow = ToolWindowManager.getInstance(
-                project).getToolWindow(MypyToolWindowPanel.ID_TOOLWINDOW);
-
-        final Content content = toolWindow.getContentManager().getContent(0);
-        if (content != null && content.getComponent() instanceof MypyToolWindowPanel) {
-            return ((MypyToolWindowPanel) content.getComponent()).isDisplayingNote();
-        }
-
-        return false;
+        Boolean displayingNotes = getFromToolWindowPanel(toolWindow(project),
+                MypyToolWindowPanel::isDisplayingNotes);
+        return Objects.requireNonNullElse(displayingNotes, false);
     }
 
     @Override
-    public void setSelected(final AnActionEvent event, final boolean selected) {
-        final Project project = PlatformDataKeys.PROJECT.getData(event.getDataContext());
+    public void setSelected(final @NotNull AnActionEvent event, final boolean selected) {
+        final Project project = getEventProject(event);
         if (project == null) {
             return;
         }
 
-        final MypyPlugin mypyPlugin
-                = project.getService(MypyPlugin.class);
-        if (mypyPlugin == null) {
-            throw new IllegalStateException("Couldn't get mypy plugin");
-        }
-
-        final ToolWindow toolWindow = ToolWindowManager.getInstance(
-                project).getToolWindow(MypyToolWindowPanel.ID_TOOLWINDOW);
-
-        final Content content = toolWindow.getContentManager().getContent(0);
-        if (content != null && content.getComponent() instanceof MypyToolWindowPanel) {
-            final MypyToolWindowPanel panel = (MypyToolWindowPanel) content.getComponent();
-            panel.setDisplayingNote(selected);
+        actOnToolWindowPanel(toolWindow(project), panel -> {
+            panel.setDisplayingNotes(selected);
             panel.filterDisplayedResults();
-        }
+        });
     }
 }

@@ -37,6 +37,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public class TypeIgnoreIntention extends PsiElementBaseIntentionAction implements IntentionAction {
     @NotNull
+    @Override
     public String getText() {
         return MypyBundle.message("intention.type-ignore.text");
     }
@@ -45,6 +46,7 @@ public class TypeIgnoreIntention extends PsiElementBaseIntentionAction implement
      * This string is also used for the directory name containing the intention description.
      */
     @NotNull
+    @Override
     public String getFamilyName() {
         return "TypeIgnoreIntention";
     }
@@ -57,6 +59,7 @@ public class TypeIgnoreIntention extends PsiElementBaseIntentionAction implement
     /**
      * Checks whether this intention is available at the caret offset in file.
      */
+    @Override
     public boolean isAvailable(@NotNull Project project, Editor editor, @Nullable PsiElement element) {
         if (element == null) {
             return false;
@@ -85,6 +88,7 @@ public class TypeIgnoreIntention extends PsiElementBaseIntentionAction implement
      * @throws IncorrectOperationException Thrown by underlying (Psi model) write action context
      *                                     when manipulation of the psi tree fails.
      */
+    @Override
     public void invoke(@NotNull Project project, Editor editor, @NotNull PsiElement element)
             throws IncorrectOperationException {
 
@@ -108,6 +112,7 @@ public class TypeIgnoreIntention extends PsiElementBaseIntentionAction implement
         }
     }
 
+    @Override
     public boolean startInWriteAction() {
         return true;
     }

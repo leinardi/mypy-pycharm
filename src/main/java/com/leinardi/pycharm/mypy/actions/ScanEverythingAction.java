@@ -17,6 +17,7 @@
 package com.leinardi.pycharm.mypy.actions;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.leinardi.pycharm.mypy.MypyPlugin;
 import com.leinardi.pycharm.mypy.util.VfUtil;
@@ -36,7 +37,7 @@ class ScanEverythingAction implements Runnable {
     public void run() {
         List<VirtualFile> filesToScan;
         // all non-excluded files of the project
-        filesToScan = VfUtil.flattenFiles(new VirtualFile[]{project.getBaseDir()});
+        filesToScan = VfUtil.flattenFiles(new VirtualFile[]{ProjectUtil.guessProjectDir(project)});
         filesToScan = VfUtil.filterOnlyPythonProjectFiles(project, filesToScan);
 
         project.getService(MypyPlugin.class).asyncScanFiles(filesToScan);

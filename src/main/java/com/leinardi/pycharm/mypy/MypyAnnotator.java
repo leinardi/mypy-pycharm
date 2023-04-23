@@ -171,7 +171,7 @@ public class MypyAnnotator extends ExternalAnnotator<MypyAnnotator.State, MypyAn
         HighlightSeverity severity = profile.getErrorLevel(key, file).getSeverity();
 
         for (Problem problem : results.issues) {
-            LOG.debug("                " + problem.getLine() + ": " + problem.getMessage());
+            LOG.debug("                " + problem.line() + ": " + problem.getMessage());
             problem.createAnnotation(holder, severity);
         }
     }

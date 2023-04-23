@@ -17,7 +17,6 @@
 package com.leinardi.pycharm.mypy;
 
 import com.intellij.openapi.components.PersistentStateComponent;
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.project.Project;
@@ -83,6 +82,6 @@ public class MypyConfigService implements PersistentStateComponent<MypyConfigSer
 
     @Nullable
     public static MypyConfigService getInstance(Project project) {
-        return ServiceManager.getService(project, MypyConfigService.class);
+        return project.getService(MypyConfigService.class);
     }
 }

@@ -20,8 +20,7 @@ import com.intellij.application.options.CodeStyle;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
-import com.intellij.openapi.module.Module;
-import com.intellij.openapi.roots.ModuleRootManager;
+import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -166,7 +165,7 @@ public class ScannableFile {
 
     private File relativePathToProjectRoot(final @NotNull PsiFile file, final @NotNull File baseTmpDir) {
         if (file.getParent() != null) {
-            final String baseDirUrl = file.getProject().getBaseDir().getUrl();
+            final String baseDirUrl = ProjectUtil.guessProjectDir(file.getProject()).getUrl();
 
             final String parentUrl = file.getParent().getVirtualFile().getUrl();
             if (parentUrl.startsWith(baseDirUrl)) {
@@ -176,18 +175,18 @@ public class ScannableFile {
         return null;
     }
 
-    private File relativePathToModuleContentRoots(final @NotNull PsiFile file, final @NotNull Module module, final
-    @NotNull File baseTmpDir) {
-        if (file.getParent() != null) {
-            final String parentUrl = file.getParent().getVirtualFile().getUrl();
-            for (String moduleSourceRoot : ModuleRootManager.getInstance(module).getContentRootUrls()) {
-                if (parentUrl.startsWith(moduleSourceRoot)) {
-                    return new File(baseTmpDir.getAbsolutePath() + parentUrl.substring(moduleSourceRoot.length()));
-                }
-            }
-        }
-        return null;
-    }
+//    private File relativePathToModuleContentRoots(final @NotNull PsiFile file, final @NotNull Module module, final
+//    @NotNull File baseTmpDir) {
+//        if (file.getParent() != null) {
+//            final String parentUrl = file.getParent().getVirtualFile().getUrl();
+//            for (String moduleSourceRoot : ModuleRootManager.getInstance(module).getContentRootUrls()) {
+//                if (parentUrl.startsWith(moduleSourceRoot)) {
+//                    return new File(baseTmpDir.getAbsolutePath() + parentUrl.substring(moduleSourceRoot.length()));
+//                }
+//            }
+//        }
+//        return null;
+//    }
 
     private File prepareBaseTmpDirFor(final PsiFile tempPsiFile) {
         final File baseTmpDir = new File(new TempDirProvider().forPersistedPsiFile(tempPsiFile),

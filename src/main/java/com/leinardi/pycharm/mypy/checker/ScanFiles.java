@@ -152,10 +152,6 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
         listeners.forEach(listener -> listener.scanFailedWithError(error));
     }
 
-    private void fireFilesScanned(final int count) {
-        listeners.forEach(listener -> listener.filesScanned(count));
-    }
-
     private List<PsiFile> buildFilesList(final PsiManager psiManager, final VirtualFile virtualFile) {
         final List<PsiFile> allChildFiles = new ArrayList<>();
         ApplicationManager.getApplication().runReadAction(() -> {

@@ -17,12 +17,9 @@
 package com.leinardi.pycharm.mypy.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.PlatformDataKeys;
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.wm.ToolWindow;
-import com.intellij.openapi.wm.ToolWindowManager;
-import com.leinardi.pycharm.mypy.MypyPlugin;
-import com.leinardi.pycharm.mypy.toolwindow.MypyToolWindowPanel;
+import org.jetbrains.annotations.NotNull;
+
+import static com.leinardi.pycharm.mypy.actions.ToolWindowAccess.toolWindow;
 
 /**
  * Action to close the tool window.
@@ -30,21 +27,8 @@ import com.leinardi.pycharm.mypy.toolwindow.MypyToolWindowPanel;
 public class Close extends BaseAction {
 
     @Override
-    public void actionPerformed(final AnActionEvent event) {
-        final Project project = PlatformDataKeys.PROJECT.getData(event.getDataContext());
-        if (project == null) {
-            return;
-        }
-
-        final MypyPlugin mypyPlugin
-                = project.getService(MypyPlugin.class);
-        if (mypyPlugin == null) {
-            throw new IllegalStateException("Couldn't get mypy plugin");
-        }
-
-        final ToolWindow toolWindow = ToolWindowManager.getInstance(
-                project).getToolWindow(MypyToolWindowPanel.ID_TOOLWINDOW);
-        toolWindow.hide(null);
+    public void actionPerformed(final @NotNull AnActionEvent event) {
+        project(event).ifPresent(project -> toolWindow(project).hide(null));
     }
 
 }
