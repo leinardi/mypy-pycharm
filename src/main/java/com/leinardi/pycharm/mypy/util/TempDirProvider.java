@@ -57,7 +57,8 @@ public class TempDirProvider {
     Optional<VirtualFile> getIdeaFolder(@NotNull final Project pProject) {
         final IProjectStore projectStore = (IProjectStore) ServiceKt.getStateStore(pProject);
         if (projectStore.getStorageScheme() == StorageScheme.DIRECTORY_BASED) {
-            final VirtualFile ideaStorageDir = ProjectUtil.guessProjectDir(pProject).findChild(Project.DIRECTORY_STORE_FOLDER);
+            final VirtualFile ideaStorageDir =
+                    ProjectUtil.guessProjectDir(pProject).findChild(Project.DIRECTORY_STORE_FOLDER);
             if (ideaStorageDir != null && ideaStorageDir.exists() && ideaStorageDir.isDirectory()) {
                 return Optional.of(ideaStorageDir);
             }

@@ -55,7 +55,7 @@ rootProject.file('src/main/resources/com/leinardi/pycharm/mypy/MypyBundle.proper
         }
 
 gradle.projectsEvaluated {
-    tasks.withType(JavaCompile) {
+    tasks.withType(JavaCompile).configureEach {
         options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
     }
 }
@@ -98,7 +98,7 @@ patchPluginXml {
 
 publishPlugin {
     def publishToken = project.hasProperty('jetbrainsPublishToken') ? jetbrainsPublishToken : ""
-    token = publishToken
+    token.set(publishToken)
     channels = [publishChannels]
 }
 
