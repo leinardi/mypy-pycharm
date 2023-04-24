@@ -1,3 +1,8 @@
+**[0.15.0] 2023-04-24**
+- Fixed #107: Icons not visible in new Jetbrains UI
+- New: Min IDEA version raised from PC-2021.2 to PC-2022.1.4
+- Several dependency updates
+
 **[0.14.0] 2022-02-26**
 - Change default inspection level to ERROR (thanks to @intgr)
 - New: Make plugin hot-reloadable (thanks to @intgr)
