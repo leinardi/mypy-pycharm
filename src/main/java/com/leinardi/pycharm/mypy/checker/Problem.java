@@ -37,9 +37,9 @@ public class Problem {
     private final boolean afterEndOfLine;
     private final boolean suppressErrors;
 
-    public Problem(final PsiElement target,
-                   final String message,
-                   final SeverityLevel severityLevel,
+    public Problem(@NotNull final PsiElement target,
+                   @NotNull final String message,
+                   @NotNull final SeverityLevel severityLevel,
                    final int line,
                    final int column,
                    final boolean afterEndOfLine,
@@ -65,15 +65,15 @@ public class Problem {
         annotation.create();
     }
 
-    public SeverityLevel getSeverityLevel() {
+    public SeverityLevel severityLevel() {
         return severityLevel;
     }
 
-    public int getLine() {
+    public int line() {
         return line;
     }
 
-    public int getColumn() {
+    public int column() {
         return column;
     }
 

@@ -92,6 +92,7 @@ public class MypyConfigPanel {
         return argumentsField.getText();
     }
 
+    @SuppressWarnings("unused")
     private void createUIComponents() {
         JBTextField autodetectTextField = new JBTextField();
         autodetectTextField.getEmptyText()

@@ -17,14 +17,13 @@
 package com.leinardi.pycharm.mypy.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vcs.changes.ChangeListManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.leinardi.pycharm.mypy.MypyPlugin;
 import com.leinardi.pycharm.mypy.util.VfUtil;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -38,50 +37,39 @@ public class ScanModifiedFiles extends BaseAction {
     private static final Logger LOG = Logger.getInstance(ScanModifiedFiles.class);
 
     @Override
-    public final void actionPerformed(final AnActionEvent event) {
-        Project project;
-        try {
-            project = PlatformDataKeys.PROJECT.getData(event.getDataContext());
-            if (project == null) {
-                return;
+    public final void actionPerformed(final @NotNull AnActionEvent event) {
+        project(event).ifPresent(project -> {
+            try {
+                final ChangeListManager changeListManager = ChangeListManager.getInstance(project);
+                project.getService(MypyPlugin.class).asyncScanFiles(
+                        VfUtil.filterOnlyPythonProjectFiles(project, changeListManager.getAffectedFiles())
+                );
+            } catch (Throwable e) {
+                LOG.warn("Modified files scan failed", e);
             }
-
-            final ChangeListManager changeListManager = ChangeListManager.getInstance(project);
-            project.getService(MypyPlugin.class).asyncScanFiles(
-                    VfUtil.filterOnlyPythonProjectFiles(project, changeListManager.getAffectedFiles())
-            );
-        } catch (Throwable e) {
-            LOG.warn("Modified files scan failed", e);
-        }
+        });
     }
 
     @Override
-    public void update(final AnActionEvent event) {
-        super.update(event);
+    public void update(final @NotNull AnActionEvent event) {
+        final Presentation presentation = event.getPresentation();
 
-        Project project;
-        try {
-            project = PlatformDataKeys.PROJECT.getData(event.getDataContext());
-            if (project == null) { // check if we're loading...
-                return;
+        project(event).ifPresentOrElse(project -> {
+            try {
+                final MypyPlugin mypyPlugin = project.getService(MypyPlugin.class);
+                if (mypyPlugin == null) {
+                    throw new IllegalStateException("Couldn't get mypy plugin");
+                }
+                // disable if no files are modified
+                final List<VirtualFile> modifiedFiles = ChangeListManager.getInstance(project).getAffectedFiles();
+                if (modifiedFiles.isEmpty()) {
+                    presentation.setEnabled(false);
+                } else {
+                    presentation.setEnabled(!mypyPlugin.isScanInProgress());
+                }
+            } catch (Throwable e) {
+                LOG.warn("Button update failed.", e);
             }
-
-            final MypyPlugin mypyPlugin = project.getService(MypyPlugin.class);
-            if (mypyPlugin == null) {
-                throw new IllegalStateException("Couldn't get mypy plugin");
-            }
-
-            final Presentation presentation = event.getPresentation();
-
-            // disable if no files are modified
-            final List<VirtualFile> modifiedFiles = ChangeListManager.getInstance(project).getAffectedFiles();
-            if (modifiedFiles.isEmpty()) {
-                presentation.setEnabled(false);
-            } else {
-                presentation.setEnabled(!mypyPlugin.isScanInProgress());
-            }
-        } catch (Throwable e) {
-            LOG.warn("Button update failed.", e);
-        }
+        }, () -> presentation.setEnabled(false));
     }
 }

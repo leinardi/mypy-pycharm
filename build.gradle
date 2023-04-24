@@ -24,20 +24,20 @@ buildscript {
         gradlePluginPortal()
     }
     dependencies {
-        classpath 'com.atlassian.commonmark:commonmark:0.11.0'
+        classpath 'com.atlassian.commonmark:commonmark:0.17.0'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
 }
 
 plugins {
-    id 'org.jetbrains.intellij' version '1.4.0'
-    id 'net.ltgt.errorprone' version '2.0.2'
+    id 'org.jetbrains.intellij' version '1.13.3'
+    id 'net.ltgt.errorprone' version '3.1.0'
     id 'idea'
     id 'java'
     id 'checkstyle'
-    id 'com.github.ben-manes.versions' version '0.27.0'
-    id 'se.bjurr.violations.violation-comments-to-github-gradle-plugin' version '1.60'
+    id 'com.github.ben-manes.versions' version '0.46.0'
+    id 'se.bjurr.violations.violation-comments-to-github-gradle-plugin' version '1.70.0'
 }
 
 checkstyle {
@@ -55,7 +55,7 @@ rootProject.file('src/main/resources/com/leinardi/pycharm/mypy/MypyBundle.proper
         }
 
 gradle.projectsEvaluated {
-    tasks.withType(JavaCompile) {
+    tasks.withType(JavaCompile).configureEach {
         options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
     }
 }
@@ -63,8 +63,8 @@ gradle.projectsEvaluated {
 group 'com.leinardi.pycharm'
 version version
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
 
 intellij {
     version = ideVersion
@@ -98,7 +98,7 @@ patchPluginXml {
 
 publishPlugin {
     def publishToken = project.hasProperty('jetbrainsPublishToken') ? jetbrainsPublishToken : ""
-    token = publishToken
+    token.set(publishToken)
     channels = [publishChannels]
 }
 
@@ -116,7 +116,7 @@ dependencies {
     if (hasPycharmPath) {
         compileOnly name: 'pycharm'
     }
-    errorprone 'com.google.errorprone:error_prone_core:2.10.0'
+    errorprone 'com.google.errorprone:error_prone_core:2.18.0'
 }
 
 def getChangelogHtml() {
@@ -146,6 +146,6 @@ task violationCommentsToGitHub(type: se.bjurr.violations.comments.github.plugin.
 }
 
 wrapper {
-    gradleVersion = "7.3.1"
+    gradleVersion = "7.6"
     distributionType = Wrapper.DistributionType.ALL
 }

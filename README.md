@@ -7,7 +7,7 @@
 This plugin provides both real-time and on-demand scanning of Python files with Mypy from within PyCharm/IDEA.
 
 Mypy is a Python source code analyzer which looks for programming errors,
-helps enforcing a coding standard and sniffs for some code smells 
+helps to enforce a coding standard and sniffs for some code smells 
 (as defined in Martin Fowler's Refactoring book).
 
 ![mypy plugin screenshot](https://github.com/leinardi/mypy-pycharm/blob/master/art/mypy-pycharm.png)

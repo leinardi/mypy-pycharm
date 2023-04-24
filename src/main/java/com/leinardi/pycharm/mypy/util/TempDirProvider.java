@@ -20,6 +20,7 @@ import com.intellij.openapi.components.ServiceKt;
 import com.intellij.openapi.components.StorageScheme;
 import com.intellij.openapi.components.impl.stores.IProjectStore;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import org.jdesktop.swingx.util.OS;
@@ -56,7 +57,8 @@ public class TempDirProvider {
     Optional<VirtualFile> getIdeaFolder(@NotNull final Project pProject) {
         final IProjectStore projectStore = (IProjectStore) ServiceKt.getStateStore(pProject);
         if (projectStore.getStorageScheme() == StorageScheme.DIRECTORY_BASED) {
-            final VirtualFile ideaStorageDir = pProject.getBaseDir().findChild(Project.DIRECTORY_STORE_FOLDER);
+            final VirtualFile ideaStorageDir =
+                    ProjectUtil.guessProjectDir(pProject).findChild(Project.DIRECTORY_STORE_FOLDER);
             if (ideaStorageDir != null && ideaStorageDir.exists() && ideaStorageDir.isDirectory()) {
                 return Optional.of(ideaStorageDir);
             }

@@ -17,11 +17,9 @@
 package com.leinardi.pycharm.mypy.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.options.ShowSettingsUtil;
-import com.intellij.openapi.project.Project;
 import com.leinardi.pycharm.mypy.MypyConfigurable;
-import com.leinardi.pycharm.mypy.MypyPlugin;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Action to close the tool window.
@@ -29,18 +27,9 @@ import com.leinardi.pycharm.mypy.MypyPlugin;
 public class Settings extends BaseAction {
 
     @Override
-    public void actionPerformed(final AnActionEvent event) {
-        final Project project = PlatformDataKeys.PROJECT.getData(event.getDataContext());
-        if (project == null) {
-            return;
-        }
-
-        final MypyPlugin mypyPlugin = project.getService(MypyPlugin.class);
-        if (mypyPlugin == null) {
-            throw new IllegalStateException("Couldn't get mypy plugin");
-        }
-
-        ShowSettingsUtil.getInstance().showSettingsDialog(project, MypyConfigurable.class);
+    public void actionPerformed(final @NotNull AnActionEvent event) {
+        project(event).ifPresent(project -> ShowSettingsUtil.getInstance().showSettingsDialog(project,
+                MypyConfigurable.class));
     }
 
 }

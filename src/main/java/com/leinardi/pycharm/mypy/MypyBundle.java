@@ -16,42 +16,22 @@
 
 package com.leinardi.pycharm.mypy;
 
-import com.intellij.CommonBundle;
-import com.intellij.reference.SoftReference;
+import com.intellij.AbstractBundle;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.PropertyKey;
 
-import java.lang.ref.Reference;
-import java.util.ResourceBundle;
-
-public final class MypyBundle {
-
-    private static Reference<ResourceBundle> bundleReference;
-
+public final class MypyBundle extends AbstractBundle {
     @NonNls
     private static final String BUNDLE = "com.leinardi.pycharm.mypy.MypyBundle";
 
+    private static final MypyBundle INSTANCE = new MypyBundle();
+
     private MypyBundle() {
-        // utility class
+        super(BUNDLE);
     }
 
     public static String message(@PropertyKey(resourceBundle = BUNDLE) final String key, final Object... params) {
-        return CommonBundle.message(getBundle(), key, params);
-    }
-
-    private static ResourceBundle getBundle() {
-        ResourceBundle bundle = null;
-
-        if (bundleReference != null) {
-            bundle = bundleReference.get();
-        }
-
-        if (bundle == null) {
-            bundle = ResourceBundle.getBundle(BUNDLE);
-            bundleReference = new SoftReference<>(bundle);
-        }
-
-        return bundle;
+        return INSTANCE.getMessage(key, params);
     }
 
 }

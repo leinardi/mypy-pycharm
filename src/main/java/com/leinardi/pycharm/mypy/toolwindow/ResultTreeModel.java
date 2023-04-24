@@ -28,10 +28,10 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import static java.util.Comparator.comparing;
@@ -69,12 +69,8 @@ public class ResultTreeModel extends DefaultTreeModel {
      * @param messageText the text to display.
      */
     public void setRootText(@Nullable final String messageText) {
-        if (messageText == null) {
-            visibleRootNode.setUserObject(new ResultTreeNode(MypyBundle.message("plugin.results.no-scan")));
-
-        } else {
-            visibleRootNode.setUserObject(new ResultTreeNode(messageText));
-        }
+        visibleRootNode.setUserObject(new ResultTreeNode(
+                Objects.requireNonNullElseGet(messageText, () -> MypyBundle.message("plugin.results.no-scan"))));
 
         nodeChanged(visibleRootNode);
     }
@@ -179,7 +175,7 @@ public class ResultTreeModel extends DefaultTreeModel {
 
                     final TogglableTreeNode problemNode = new TogglableTreeNode(problemObj);
                     fileNode.add(problemNode);
-                    fileCounts[problem.getSeverityLevel().ordinal()]++;
+                    fileCounts[problem.severityLevel().ordinal()]++;
                 }
 
                 for (int i = 0; i < totalCounts.length; i++) {
@@ -210,7 +206,7 @@ public class ResultTreeModel extends DefaultTreeModel {
 
     private Iterable<PsiFile> sortedFileNames(final Map<PsiFile, List<Problem>> results) {
         if (results == null || results.isEmpty()) {
-            return Collections.emptyList();
+            return new ArrayList<>();
         }
         final List<PsiFile> sortedFiles = new ArrayList<>(results.keySet());
         sortedFiles.sort(comparing(PsiFileSystemItem::getName));

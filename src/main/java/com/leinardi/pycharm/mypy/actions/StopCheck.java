@@ -17,13 +17,12 @@
 package com.leinardi.pycharm.mypy.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.actionSystem.Presentation;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
-import com.intellij.openapi.wm.ToolWindowManager;
 import com.leinardi.pycharm.mypy.MypyPlugin;
-import com.leinardi.pycharm.mypy.toolwindow.MypyToolWindowPanel;
+import org.jetbrains.annotations.NotNull;
+
+import static com.leinardi.pycharm.mypy.actions.ToolWindowAccess.toolWindow;
 
 /**
  * Action to stop a check in progress.
@@ -31,55 +30,41 @@ import com.leinardi.pycharm.mypy.toolwindow.MypyToolWindowPanel;
 public class StopCheck extends BaseAction {
 
     @Override
-    public void actionPerformed(final AnActionEvent event) {
-        final Project project = PlatformDataKeys.PROJECT.getData(event.getDataContext());
-        if (project == null) {
-            return;
-        }
+    public void actionPerformed(final @NotNull AnActionEvent event) {
+        project(event).ifPresent(project -> {
+            try {
+                final ToolWindow toolWindow = toolWindow(project);
+                toolWindow.activate(() -> {
+                    setProgressText(toolWindow, "plugin.status.in-progress.current");
+                    final MypyPlugin mypyPlugin
+                            = project.getService(MypyPlugin.class);
+                    if (mypyPlugin == null) {
+                        throw new IllegalStateException("Couldn't get mypy plugin");
+                    }
+                    mypyPlugin.stopChecks();
 
-        try {
-            final MypyPlugin mypyPlugin
-                    = project.getService(MypyPlugin.class);
-            if (mypyPlugin == null) {
-                throw new IllegalStateException("Couldn't get mypy plugin");
+                    setProgressText(toolWindow, "plugin.status.aborted");
+                });
+
+            } catch (Throwable e) {
+                MypyPlugin.processErrorAndLog("Abort Scan", e);
             }
-
-            final ToolWindow toolWindow = ToolWindowManager.getInstance(
-                    project).getToolWindow(MypyToolWindowPanel.ID_TOOLWINDOW);
-            toolWindow.activate(() -> {
-                setProgressText(toolWindow, "plugin.status.in-progress.current");
-
-                mypyPlugin.stopChecks();
-
-                setProgressText(toolWindow, "plugin.status.aborted");
-            });
-
-        } catch (Throwable e) {
-            MypyPlugin.processErrorAndLog("Abort Scan", e);
-        }
+        });
     }
 
     @Override
-    public void update(final AnActionEvent event) {
-        super.update(event);
-
-        try {
-            final Project project = PlatformDataKeys.PROJECT.getData(event.getDataContext());
-            if (project == null) { // check if we're loading...
-                return;
-            }
-
-            final MypyPlugin mypyPlugin
-                    = project.getService(MypyPlugin.class);
+    public void update(final @NotNull AnActionEvent event) {
+        final Presentation presentation = event.getPresentation();
+        project(event).ifPresentOrElse(project -> {
+            final MypyPlugin mypyPlugin = project.getService(MypyPlugin.class);
             if (mypyPlugin == null) {
                 throw new IllegalStateException("Couldn't get mypy plugin");
             }
-
-            final Presentation presentation = event.getPresentation();
-            presentation.setEnabled(mypyPlugin.isScanInProgress());
-
-        } catch (Throwable e) {
-            MypyPlugin.processErrorAndLog("Abort button update", e);
-        }
+            try {
+                presentation.setEnabled(mypyPlugin.isScanInProgress());
+            } catch (Throwable e) {
+                MypyPlugin.processErrorAndLog("Abort button update", e);
+            }
+        }, () -> presentation.setEnabled(false));
     }
 }

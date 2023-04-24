@@ -17,7 +17,6 @@
 package com.leinardi.pycharm.mypy.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
@@ -25,12 +24,13 @@ import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
-import com.intellij.openapi.wm.ToolWindowManager;
 import com.leinardi.pycharm.mypy.MypyPlugin;
-import com.leinardi.pycharm.mypy.toolwindow.MypyToolWindowPanel;
 import com.leinardi.pycharm.mypy.util.FileTypes;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
+
+import static com.leinardi.pycharm.mypy.actions.ToolWindowAccess.toolWindow;
 
 /**
  * Action to execute a Mypy scan on the current editor file.
@@ -38,43 +38,32 @@ import java.util.Collections;
 public class ScanCurrentFile extends BaseAction {
 
     @Override
-    public void actionPerformed(final AnActionEvent event) {
-        final Project project = PlatformDataKeys.PROJECT.getData(event.getDataContext());
-        if (project == null) {
-            return;
-        }
+    public void actionPerformed(final @NotNull AnActionEvent event) {
+        project(event).ifPresent(project -> {
+            try {
+                final ToolWindow toolWindow = toolWindow(project);
+                toolWindow.activate(() -> {
+                    try {
+                        setProgressText(toolWindow, "plugin.status.in-progress.current");
 
-        try {
-            final MypyPlugin mypyPlugin
-                    = project.getService(MypyPlugin.class);
-            if (mypyPlugin == null) {
-                throw new IllegalStateException("Couldn't get mypy plugin");
-            }
+                        final VirtualFile selectedFile = getSelectedFile(project);
+                        if (selectedFile != null) {
+                            project.getService(MypyPlugin.class).asyncScanFiles(
+                                    Collections.singletonList(selectedFile));
+                        }
 
-            final ToolWindow toolWindow = ToolWindowManager.getInstance(
-                    project).getToolWindow(MypyToolWindowPanel.ID_TOOLWINDOW);
-            toolWindow.activate(() -> {
-                try {
-                    setProgressText(toolWindow, "plugin.status.in-progress.current");
-
-                    final VirtualFile selectedFile = getSelectedFile(project);
-                    if (selectedFile != null) {
-                        project.getService(MypyPlugin.class).asyncScanFiles(
-                                Collections.singletonList(selectedFile));
+                    } catch (Throwable e) {
+                        MypyPlugin.processErrorAndLog("Current File scan", e);
                     }
+                });
 
-                } catch (Throwable e) {
-                    MypyPlugin.processErrorAndLog("Current File scan", e);
-                }
-            });
-
-        } catch (Throwable e) {
-            MypyPlugin.processErrorAndLog("Current File scan", e);
-        }
+            } catch (Throwable e) {
+                MypyPlugin.processErrorAndLog("Current File scan", e);
+            }
+        });
     }
 
-    private VirtualFile getSelectedFile(final Project project) {
-
+    private VirtualFile getSelectedFile(final @NotNull Project project) {
         VirtualFile selectedFile = null;
 
         final Editor selectedTextEditor = FileEditorManager.getInstance(project).getSelectedTextEditor();
@@ -101,31 +90,27 @@ public class ScanCurrentFile extends BaseAction {
     }
 
     @Override
-    public void update(final AnActionEvent event) {
-        super.update(event);
+    public void update(final @NotNull AnActionEvent event) {
+        final Presentation presentation = event.getPresentation();
 
-        try {
-            final Project project = PlatformDataKeys.PROJECT.getData(event.getDataContext());
-            if (project == null) { // check if we're loading...
-                return;
-            }
+        project(event).ifPresentOrElse(project -> {
+            try {
+                final MypyPlugin mypyPlugin
+                        = project.getService(MypyPlugin.class);
+                if (mypyPlugin == null) {
+                    throw new IllegalStateException("Couldn't get mypy plugin");
+                }
+                final VirtualFile selectedFile = getSelectedFile(project);
 
-            final MypyPlugin mypyPlugin
-                    = project.getService(MypyPlugin.class);
-            if (mypyPlugin == null) {
-                throw new IllegalStateException("Couldn't get mypy plugin");
+                // disable if no file is selected or scan in progress
+                if (selectedFile != null) {
+                    presentation.setEnabled(!mypyPlugin.isScanInProgress());
+                } else {
+                    presentation.setEnabled(false);
+                }
+            } catch (Throwable e) {
+                MypyPlugin.processErrorAndLog("Current File button update", e);
             }
-            final VirtualFile selectedFile = getSelectedFile(project);
-
-            // disable if no file is selected or scan in progress
-            final Presentation presentation = event.getPresentation();
-            if (selectedFile != null) {
-                presentation.setEnabled(!mypyPlugin.isScanInProgress());
-            } else {
-                presentation.setEnabled(false);
-            }
-        } catch (Throwable e) {
-            MypyPlugin.processErrorAndLog("Current File button update", e);
-        }
+        }, () -> presentation.setEnabled(false));
     }
 }

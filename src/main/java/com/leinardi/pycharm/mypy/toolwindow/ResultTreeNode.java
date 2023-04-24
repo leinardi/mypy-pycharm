@@ -82,7 +82,7 @@ public class ResultTreeNode {
         this.file = file;
         this.problem = problem;
 
-        severity = problem.getSeverityLevel();
+        severity = problem.severityLevel();
 
         updateIconsForProblem();
     }
@@ -218,8 +218,8 @@ public class ResultTreeNode {
         return MypyBundle.message(
                 "plugin.results.file-result",
                 problem.getMessage(),
-                problem.getLine(),
-                Integer.toString(problem.getColumn())
+                problem.line(),
+                Integer.toString(problem.column())
         );
     }
 

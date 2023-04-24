@@ -19,6 +19,7 @@ package com.leinardi.pycharm.mypy;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.leinardi.pycharm.mypy.checker.Problem;
@@ -69,7 +70,7 @@ public final class MypyPlugin {
 
     @Nullable
     private File getProjectPath() {
-        final VirtualFile baseDir = project.getBaseDir();
+        final VirtualFile baseDir = ProjectUtil.guessProjectDir(project);
         if (baseDir == null) {
             return null;
         }

@@ -17,12 +17,11 @@
 package com.leinardi.pycharm.mypy.checker;
 
 import com.intellij.application.options.CodeStyle;
-import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
-import com.intellij.openapi.module.Module;
-import com.intellij.openapi.roots.ModuleRootManager;
-import com.intellij.openapi.util.Computable;
+import com.intellij.openapi.project.ProjectUtil;
+import com.intellij.openapi.util.ThrowableComputable;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
@@ -89,19 +88,19 @@ public class ScannableFile {
     public static List<ScannableFile> createAndValidate(@NotNull final Collection<PsiFile> psiFiles,
                                                         @NotNull final MypyPlugin plugin/*,
                                                         @Nullable final Module module*/) {
-        Computable<List<ScannableFile>> action = () -> psiFiles.stream()
+        ThrowableComputable<List<ScannableFile>, RuntimeException> action = () -> psiFiles.stream()
                 .filter(currentFile -> PsiFileValidator.isScannable(currentFile, plugin.getProject()))
                 .map(ScannableFile::create)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toCollection(CopyOnWriteArrayList::new));
-        return ApplicationManager.getApplication().runReadAction(action);
+        return ReadAction.compute(action);
     }
 
     @Nullable
     private static ScannableFile create(@NotNull final PsiFile psiFile) {
         try {
             final CreateScannableFileAction fileAction = new CreateScannableFileAction(psiFile);
-            ApplicationManager.getApplication().runReadAction(fileAction);
+            ReadAction.run(fileAction);
 
             //noinspection ThrowableResultOfMethodCallIgnored
             if (fileAction.getFailure() != null) {
@@ -166,7 +165,7 @@ public class ScannableFile {
 
     private File relativePathToProjectRoot(final @NotNull PsiFile file, final @NotNull File baseTmpDir) {
         if (file.getParent() != null) {
-            final String baseDirUrl = file.getProject().getBaseDir().getUrl();
+            final String baseDirUrl = ProjectUtil.guessProjectDir(file.getProject()).getUrl();
 
             final String parentUrl = file.getParent().getVirtualFile().getUrl();
             if (parentUrl.startsWith(baseDirUrl)) {
@@ -176,18 +175,18 @@ public class ScannableFile {
         return null;
     }
 
-    private File relativePathToModuleContentRoots(final @NotNull PsiFile file, final @NotNull Module module, final
-    @NotNull File baseTmpDir) {
-        if (file.getParent() != null) {
-            final String parentUrl = file.getParent().getVirtualFile().getUrl();
-            for (String moduleSourceRoot : ModuleRootManager.getInstance(module).getContentRootUrls()) {
-                if (parentUrl.startsWith(moduleSourceRoot)) {
-                    return new File(baseTmpDir.getAbsolutePath() + parentUrl.substring(moduleSourceRoot.length()));
-                }
-            }
-        }
-        return null;
-    }
+//    private File relativePathToModuleContentRoots(final @NotNull PsiFile file, final @NotNull Module module, final
+//    @NotNull File baseTmpDir) {
+//        if (file.getParent() != null) {
+//            final String parentUrl = file.getParent().getVirtualFile().getUrl();
+//            for (String moduleSourceRoot : ModuleRootManager.getInstance(module).getContentRootUrls()) {
+//                if (parentUrl.startsWith(moduleSourceRoot)) {
+//                    return new File(baseTmpDir.getAbsolutePath() + parentUrl.substring(moduleSourceRoot.length()));
+//                }
+//            }
+//        }
+//        return null;
+//    }
 
     private File prepareBaseTmpDirFor(final PsiFile tempPsiFile) {
         final File baseTmpDir = new File(new TempDirProvider().forPersistedPsiFile(tempPsiFile),

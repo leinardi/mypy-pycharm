@@ -17,14 +17,16 @@
 package com.leinardi.pycharm.mypy.actions;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.util.ThrowableRunnable;
 import com.leinardi.pycharm.mypy.MypyPlugin;
 import com.leinardi.pycharm.mypy.util.VfUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-class ScanEverythingAction implements Runnable {
+class ScanEverythingAction implements ThrowableRunnable<RuntimeException> {
 
     private final Project project;
 
@@ -36,7 +38,7 @@ class ScanEverythingAction implements Runnable {
     public void run() {
         List<VirtualFile> filesToScan;
         // all non-excluded files of the project
-        filesToScan = VfUtil.flattenFiles(new VirtualFile[]{project.getBaseDir()});
+        filesToScan = VfUtil.flattenFiles(new VirtualFile[]{ProjectUtil.guessProjectDir(project)});
         filesToScan = VfUtil.filterOnlyPythonProjectFiles(project, filesToScan);
 
         project.getService(MypyPlugin.class).asyncScanFiles(filesToScan);

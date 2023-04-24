@@ -17,6 +17,7 @@
 package com.leinardi.pycharm.mypy.checker;
 
 import com.intellij.psi.PsiFile;
+import com.intellij.util.ThrowableRunnable;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -24,7 +25,7 @@ import java.io.IOException;
 /**
  * Action to read the file to a temporary file.
  */
-class CreateScannableFileAction implements Runnable {
+class CreateScannableFileAction implements ThrowableRunnable<RuntimeException> {
 
     /**
      * Any failure that occurred on the thread.
