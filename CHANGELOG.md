@@ -1,3 +1,8 @@
+**[0.16.0] 2023-08-31**
+- Fixed #63: Remote Interpreter
+- Fixed #110: Support for mypy using WSL interpreter
+- Respect mypy path field and don't force usage of project interpreter
+
 **[0.15.0] 2023-04-24**
 - Fixed #107: Icons not visible in new Jetbrains UI
 - New: Min IDEA version raised from PC-2021.2 to PC-2022.1.4

@@ -58,6 +58,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.nio.file.Path;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -137,6 +138,7 @@ public class MypyRunner {
                 return mypyPath;
             }
         }
+
         VirtualFile interpreterFile = getInterpreterFile(project);
         if (isVenv(interpreterFile)) {
             VirtualFile mypyFile = LocalFileSystem.getInstance()
@@ -155,6 +157,12 @@ public class MypyRunner {
     }
 
     public static boolean checkMypyAvailable(Project project, boolean showNotifications) {
+        String mypyPath = getMypyPath(project);
+        boolean isMypyPathValid = !mypyPath.isEmpty() && isMypyPathValid(mypyPath, project);
+        if (isMypyPathValid) {
+            return true;
+        }
+
         Sdk projectSdk = ProjectRootManager.getInstance(project).getProjectSdk();
         if (projectSdk == null
                 || projectSdk.getHomeDirectory() == null
@@ -173,16 +181,8 @@ public class MypyRunner {
                 }
             }
         }
-        MypyConfigService mypyConfigService = MypyConfigService.getInstance(project);
-        if (mypyConfigService == null) {
-            throw new IllegalStateException("MypyConfigService is null");
-        }
-        String mypyPath = getMypyPath(project);
-        boolean isMypyPathValid = !mypyPath.isEmpty() && isMypyPathValid(mypyPath, project);
-        if (showNotifications && !isMypyPathValid) {
-            Notifications.showUnableToRunMypy(project);
-        }
-        return isMypyPathValid;
+
+        return false;
     }
 
     private static String getMypyConfigFile(Project project, String mypyConfigFilePath) throws MypyPluginException {
@@ -382,11 +382,28 @@ public class MypyRunner {
 
     @Nullable
     private static VirtualFile getInterpreterFile(Project project) {
-        Sdk projectSdk = ProjectRootManager.getInstance(project).getProjectSdk();
-        if (projectSdk != null) {
-            return projectSdk.getHomeDirectory();
+        MypyConfigService mypyConfigService = MypyConfigService.getInstance(project);
+        if (mypyConfigService == null) {
+            throw new IllegalStateException("MypyConfigService is null");
         }
-        return null;
+        String customMypyPath = mypyConfigService.getCustomMypyPath();
+        if (!customMypyPath.isEmpty()) {
+            Path mypyFolder = Path.of(customMypyPath).getParent();
+            File file = mypyFolder.resolve("python").toFile();
+            if (!file.exists()) {
+                return null;
+            }
+
+            LocalFileSystem fileSystem = LocalFileSystem.getInstance();
+            return fileSystem.findFileByIoFile(file);
+
+        } else {
+            Sdk projectSdk = ProjectRootManager.getInstance(project).getProjectSdk();
+            if (projectSdk != null) {
+                return projectSdk.getHomeDirectory();
+            }
+            return null;
+        }
     }
 
     private static void injectEnvironmentVariables(Project project, GeneralCommandLine cmd) {
