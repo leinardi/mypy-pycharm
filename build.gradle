@@ -17,6 +17,7 @@
 import org.commonmark.node.Node
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
+import se.bjurr.violations.comments.github.plugin.gradle.ViolationCommentsToGitHubTask
 
 buildscript {
     repositories {
@@ -31,12 +32,12 @@ buildscript {
 }
 
 plugins {
-    id 'org.jetbrains.intellij' version '1.13.3'
+    id 'org.jetbrains.intellij' version '1.15.0'
     id 'net.ltgt.errorprone' version '3.1.0'
     id 'idea'
     id 'java'
     id 'checkstyle'
-    id 'com.github.ben-manes.versions' version '0.46.0'
+    id 'com.github.ben-manes.versions' version '0.47.0'
     id 'se.bjurr.violations.violation-comments-to-github-gradle-plugin' version '1.70.0'
 }
 
@@ -116,7 +117,7 @@ dependencies {
     if (hasPycharmPath) {
         compileOnly name: 'pycharm'
     }
-    errorprone 'com.google.errorprone:error_prone_core:2.18.0'
+    errorprone 'com.google.errorprone:error_prone_core:2.21.1'
 }
 
 def getChangelogHtml() {
@@ -128,7 +129,7 @@ def getChangelogHtml() {
 
 check.dependsOn(verifyPlugin)
 
-task violationCommentsToGitHub(type: se.bjurr.violations.comments.github.plugin.gradle.ViolationCommentsToGitHubTask) {
+task violationCommentsToGitHub(type: ViolationCommentsToGitHubTask) {
     repositoryOwner = "leinardi"
     repositoryName = "mypy-pycharm"
     pullRequestId = System.properties['GITHUB_PULLREQUESTID']
@@ -146,6 +147,6 @@ task violationCommentsToGitHub(type: se.bjurr.violations.comments.github.plugin.
 }
 
 wrapper {
-    gradleVersion = "7.6"
+    gradleVersion = "8.2.1"
     distributionType = Wrapper.DistributionType.ALL
 }

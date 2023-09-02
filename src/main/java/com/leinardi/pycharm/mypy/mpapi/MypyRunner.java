@@ -170,18 +170,15 @@ public class MypyRunner {
             if (showNotifications) {
                 Notifications.showNoPythonInterpreter(project);
             }
-            return false;
         } else if (showNotifications) {
             PyPackageManager pyPackageManager = PyPackageManager.getInstance(projectSdk);
             List<PyPackage> packages = pyPackageManager.getPackages();
             if (packages != null) {
                 if (packages.stream().noneMatch(it -> MYPY_PACKAGE_NAME.equals(it.getName()))) {
                     Notifications.showInstallMypy(project);
-                    return false;
                 }
             }
         }
-
         return false;
     }
 
@@ -216,7 +213,7 @@ public class MypyRunner {
                 LOG.info("Command Line string: " + cmd.getCommandLineString());
                 LOG.warn("Error while detecting Mypy path: " + error);
             }
-            if (process.exitValue() != 0 || !path.isPresent()) {
+            if (process.exitValue() != 0 || path.isEmpty()) {
                 LOG.info("Command Line string: " + cmd.getCommandLineString());
                 LOG.warn("Mypy path detect process.exitValue: " + process.exitValue());
                 return "";
@@ -317,7 +314,7 @@ public class MypyRunner {
                 // but there are still cases where Mypy returns 2 and still reports errors
                 // (e.g. syntax errors or "break" outside loop).
                 // See https://github.com/python/mypy/issues/6003.
-                if (issues.size() == 0) {
+                if (issues.isEmpty()) {
                     InputStream errStream = process.getErrorStream();
                     String detail = new BufferedReader(new InputStreamReader(errStream, UTF_8))
                             .lines().collect(Collectors.joining("\n"));
