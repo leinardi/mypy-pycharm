@@ -16,13 +16,11 @@
 
 package com.leinardi.pycharm.mypy.mpapi;
 
+import java.util.Objects;
+
 /**
  * An issue as reported by the Mypy tool.
  */
-
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.ToStringBuilder;
 
 public class Issue {
 
@@ -62,42 +60,33 @@ public class Issue {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .append("path", path)
-                .append("line", line)
-                .append("column", column)
-                .append("type", severityLevel)
-                .append("message", message)
-                .toString();
+        return "Issue{" +
+                "path='" + path + '\'' +
+                ", line=" + line +
+                ", column=" + column +
+                ", severityLevel=" + severityLevel +
+                ", message='" + message + '\'' +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Issue)) {
+            return false;
+        }
+        Issue issue = (Issue) o;
+        return line == issue.line &&
+                column == issue.column &&
+                Objects.equals(path, issue.path) &&
+                severityLevel == issue.severityLevel &&
+                Objects.equals(message, issue.message);
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder()
-                .append(path)
-                .append(line)
-                .append(column)
-                .append(severityLevel)
-                .append(message)
-                .toHashCode();
+        return Objects.hash(path, line, column, severityLevel, message);
     }
-
-    @Override
-    public boolean equals(Object other) {
-        if (other == this) {
-            return true;
-        }
-        if (!(other instanceof Issue)) {
-            return false;
-        }
-        Issue rhs = ((Issue) other);
-        return new EqualsBuilder()
-                .append(path, rhs.path)
-                .append(line, rhs.line)
-                .append(column, rhs.column)
-                .append(severityLevel, rhs.severityLevel)
-                .append(message, rhs.message)
-                .isEquals();
-    }
-
 }
