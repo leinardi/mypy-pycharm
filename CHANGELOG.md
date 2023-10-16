@@ -1,3 +1,7 @@
+**[0.16.2] 2023-10-16**
+
+- Fix compatibility issues
+
 **[0.16.1] 2023-10-09**
 
 - Fix several compatibility issues
