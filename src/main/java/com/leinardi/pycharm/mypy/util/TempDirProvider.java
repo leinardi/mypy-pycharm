@@ -16,14 +16,10 @@
 
 package com.leinardi.pycharm.mypy.util;
 
-import com.intellij.openapi.components.ServiceKt;
-import com.intellij.openapi.components.StorageScheme;
-import com.intellij.openapi.components.impl.stores.IProjectStore;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
-import org.jdesktop.swingx.util.OS;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -54,11 +50,10 @@ public class TempDirProvider {
                 .orElse(new File(project.getBasePath(), "mypymypy.tmp"));
     }
 
-    Optional<VirtualFile> getIdeaFolder(@NotNull final Project pProject) {
-        final IProjectStore projectStore = (IProjectStore) ServiceKt.getStateStore(pProject);
-        if (projectStore.getStorageScheme() == StorageScheme.DIRECTORY_BASED) {
-            final VirtualFile ideaStorageDir =
-                    ProjectUtil.guessProjectDir(pProject).findChild(Project.DIRECTORY_STORE_FOLDER);
+    Optional<VirtualFile> getIdeaFolder(@NotNull final Project project) {
+        VirtualFile projectDir = ProjectUtil.guessProjectDir(project);
+        if (projectDir != null) {
+            final VirtualFile ideaStorageDir = projectDir.findChild(Project.DIRECTORY_STORE_FOLDER);
             if (ideaStorageDir != null && ideaStorageDir.exists() && ideaStorageDir.isDirectory()) {
                 return Optional.of(ideaStorageDir);
             }

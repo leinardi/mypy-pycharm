@@ -52,6 +52,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -356,7 +357,7 @@ public class MypyRunner {
                     // Mypy uses 1-based column numbers, IntelliJ expects 0-based
                     int column = splitPosition.length > 2 ? Integer.parseInt(splitPosition[2].trim()) - 1 : 1;
                     String[] splitError = rawLine.substring(typeIndexStart).split(":", 2);
-                    SeverityLevel severityLevel = SeverityLevel.valueOf(splitError[0].trim().toUpperCase());
+                    SeverityLevel severityLevel = SeverityLevel.valueOf(splitError[0].trim().toUpperCase(Locale.ROOT));
                     String message = splitError[1].trim();
                     issues.add(new Issue(path, line, column, severityLevel, message));
                 }

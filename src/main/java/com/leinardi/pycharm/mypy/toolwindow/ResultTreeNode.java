@@ -21,11 +21,10 @@ import com.leinardi.pycharm.mypy.MypyBundle;
 import com.leinardi.pycharm.mypy.checker.Problem;
 import com.leinardi.pycharm.mypy.mpapi.SeverityLevel;
 import com.leinardi.pycharm.mypy.util.Icons;
+import com.leinardi.pycharm.mypy.util.Strings;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.Icon;
-
-import static org.apache.commons.lang.StringUtils.isBlank;
 
 /**
  * The user object for meta-data on tree nodes in the tool window.
@@ -158,7 +157,7 @@ public class ResultTreeNode {
      * @param text the file the node represents.
      */
     public void setText(final String text) {
-        if (isBlank(text)) {
+        if (Strings.isBlank(text)) {
             throw new IllegalArgumentException("Text may not be null/empty");
         }
         this.text = text;

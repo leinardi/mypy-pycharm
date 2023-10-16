@@ -23,10 +23,9 @@ import com.intellij.psi.PsiElement;
 import com.leinardi.pycharm.mypy.MypyBundle;
 import com.leinardi.pycharm.mypy.intentions.TypeIgnoreIntention;
 import com.leinardi.pycharm.mypy.mpapi.SeverityLevel;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.ToStringBuilder;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 public class Problem {
     private final PsiElement target;
@@ -91,47 +90,37 @@ public class Problem {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .append("target", target)
-                .append("message", message)
-                .append("severityLevel", severityLevel)
-                .append("line", line)
-                .append("column", column)
-                .append("afterEndOfLine", afterEndOfLine)
-                .append("suppressErrors", suppressErrors)
-                .toString();
+        return "Problem{" +
+                "target=" + target +
+                ", severityLevel=" + severityLevel +
+                ", line=" + line +
+                ", column=" + column +
+                ", message='" + message + '\'' +
+                ", afterEndOfLine=" + afterEndOfLine +
+                ", suppressErrors=" + suppressErrors +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Problem)) {
+            return false;
+        }
+        Problem problem = (Problem) o;
+        return line == problem.line &&
+                column == problem.column &&
+                afterEndOfLine == problem.afterEndOfLine &&
+                suppressErrors == problem.suppressErrors &&
+                Objects.equals(target, problem.target) &&
+                severityLevel == problem.severityLevel &&
+                Objects.equals(message, problem.message);
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder()
-                .append(target)
-                .append(message)
-                .append(severityLevel)
-                .append(line)
-                .append(column)
-                .append(afterEndOfLine)
-                .append(suppressErrors)
-                .toHashCode();
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        if (other == this) {
-            return true;
-        }
-        if (!(other instanceof Problem)) {
-            return false;
-        }
-        Problem rhs = ((Problem) other);
-        return new EqualsBuilder()
-                .append(target, rhs.target)
-                .append(message, rhs.message)
-                .append(severityLevel, rhs.severityLevel)
-                .append(line, rhs.line)
-                .append(column, rhs.column)
-                .append(afterEndOfLine, rhs.afterEndOfLine)
-                .append(suppressErrors, rhs.suppressErrors)
-                .isEquals();
+        return Objects.hash(target, severityLevel, line, column, message, afterEndOfLine, suppressErrors);
     }
 }
