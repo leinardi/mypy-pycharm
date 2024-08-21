@@ -32,12 +32,12 @@ buildscript {
 }
 
 plugins {
-    id 'org.jetbrains.intellij' version '1.15.0'
-    id 'net.ltgt.errorprone' version '3.1.0'
+    id 'org.jetbrains.intellij' version '1.17.4'
+    id 'net.ltgt.errorprone' version '4.0.1'
     id 'idea'
     id 'java'
     id 'checkstyle'
-    id 'com.github.ben-manes.versions' version '0.47.0'
+    id 'com.github.ben-manes.versions' version '0.51.0'
     id 'se.bjurr.violations.violation-comments-to-github-gradle-plugin' version '1.70.0'
 }
 
@@ -117,7 +117,7 @@ dependencies {
     if (hasPycharmPath) {
         compileOnly name: 'pycharm'
     }
-    errorprone 'com.google.errorprone:error_prone_core:2.21.1'
+    errorprone 'com.google.errorprone:error_prone_core:2.30.0'
 }
 
 def getChangelogHtml() {
@@ -147,6 +147,6 @@ task violationCommentsToGitHub(type: ViolationCommentsToGitHubTask) {
 }
 
 wrapper {
-    gradleVersion = "8.2.1"
+    gradleVersion = "8.10"
     distributionType = Wrapper.DistributionType.ALL
 }

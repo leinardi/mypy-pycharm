@@ -1,6 +1,7 @@
 **[0.16.3] 2024-08-21**
 
 - New: Min IDEA version raised from PC-2022.1.4 to PC-2023.3.6
+- Several dependency updates
 
 **[0.16.2] 2023-10-16**
 
