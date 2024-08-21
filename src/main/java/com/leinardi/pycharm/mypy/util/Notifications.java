@@ -38,7 +38,6 @@ import org.jetbrains.annotations.Nullable;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import static com.intellij.notification.NotificationListener.URL_OPENING_LISTENER;
 import static com.intellij.notification.NotificationType.ERROR;
 import static com.intellij.notification.NotificationType.INFORMATION;
 import static com.intellij.notification.NotificationType.WARNING;
@@ -59,35 +58,30 @@ public final class Notifications {
     public static void showInfo(final Project project, final String infoText) {
         BALLOON_GROUP
                 .createNotification(TITLE, infoText, INFORMATION)
-                .setListener(URL_OPENING_LISTENER)
                 .notify(project);
     }
 
     public static void showWarning(final Project project, final String warningText) {
         BALLOON_GROUP
                 .createNotification(TITLE, warningText, WARNING)
-                .setListener(URL_OPENING_LISTENER)
                 .notify(project);
     }
 
     public static void showWarning(final Project project, final String title, final String warningText) {
         BALLOON_GROUP
                 .createNotification(title, warningText, WARNING)
-                .setListener(URL_OPENING_LISTENER)
                 .notify(project);
     }
 
     public static void showError(final Project project, final String errorText) {
         BALLOON_GROUP
                 .createNotification(TITLE, errorText, ERROR)
-                .setListener(URL_OPENING_LISTENER)
                 .notify(project);
     }
 
     public static void showException(final Project project, final Throwable t) {
         LOG_ONLY_GROUP
                 .createNotification(message("plugin.exception"), messageFor(t), ERROR)
-                .setListener(URL_OPENING_LISTENER)
                 .notify(project);
     }
 
@@ -97,8 +91,7 @@ public final class Notifications {
                         TITLE,
                         MypyBundle.message("plugin.notification.install-mypy.content"),
                         ERROR)
-                .setSubtitle(MypyBundle.message("plugin.notification.install-mypy.subtitle"))
-                .setListener(URL_OPENING_LISTENER);
+                .setSubtitle(MypyBundle.message("plugin.notification.install-mypy.subtitle"));
         notification
                 .addAction(new InstallMypyAction(project, notification))
                 .notify(project);
@@ -110,8 +103,7 @@ public final class Notifications {
                         TITLE,
                         MypyBundle.message("plugin.notification.unable-to-run-mypy.content"),
                         ERROR)
-                .setSubtitle(MypyBundle.message("plugin.notification.unable-to-run-mypy.subtitle"))
-                .setListener(URL_OPENING_LISTENER);
+                .setSubtitle(MypyBundle.message("plugin.notification.unable-to-run-mypy.subtitle"));
         notification
                 .addAction(new OpenPluginSettingsAction(notification))
                 .notify(project);
@@ -120,7 +112,6 @@ public final class Notifications {
     public static void showMypyAbnormalExit(final Project project, final String detail) {
         BALLOON_GROUP
                 .createNotification(TITLE, detail, ERROR)
-                .setListener(URL_OPENING_LISTENER)
                 .setSubtitle(MypyBundle.message("plugin.notification.abnormal-exit.subtitle"))
                 .notify(project);
     }
@@ -130,8 +121,7 @@ public final class Notifications {
                 .createNotification(
                         TITLE,
                         MypyBundle.message("plugin.notification.no-python-interpreter.content"),
-                        ERROR)
-                .setListener(URL_OPENING_LISTENER);
+                        ERROR);
         notification
                 .addAction(new ConfigurePythonInterpreterAction(project, notification))
                 .notify(project);
