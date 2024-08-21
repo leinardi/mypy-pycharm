@@ -16,6 +16,7 @@
 
 package com.leinardi.pycharm.mypy.actions;
 
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.project.DumbAwareToggleAction;
@@ -25,6 +26,7 @@ import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.content.Content;
 import com.leinardi.pycharm.mypy.MypyPlugin;
 import com.leinardi.pycharm.mypy.toolwindow.MypyToolWindowPanel;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Toggle the scroll to source setting.
@@ -75,5 +77,10 @@ public final class ScrollToSource extends DumbAwareToggleAction {
         if (content != null && content.getComponent() instanceof MypyToolWindowPanel) {
             ((MypyToolWindowPanel) content.getComponent()).setScrollToSource(selected);
         }
+    }
+
+    @Override
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.EDT;
     }
 }

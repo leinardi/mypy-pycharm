@@ -16,6 +16,7 @@
 
 package com.leinardi.pycharm.mypy.actions;
 
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.project.DumbAwareToggleAction;
@@ -57,5 +58,10 @@ public class DisplayNote extends DumbAwareToggleAction {
             panel.setDisplayingNotes(selected);
             panel.filterDisplayedResults();
         });
+    }
+
+    @Override
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.EDT;
     }
 }
