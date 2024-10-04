@@ -12,6 +12,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Modifications:
+ * - 2024-10-03: Modified by Dominik Willner to fix ActionUpdateThread deprecation warnings.
  */
 
 package com.leinardi.pycharm.mypy.actions;
@@ -32,6 +35,11 @@ import org.jetbrains.annotations.NotNull;
  * Toggle the scroll to source setting.
  */
 public final class ScrollToSource extends DumbAwareToggleAction {
+
+    @Override
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.EDT;
+    }
 
     @Override
     public boolean isSelected(final AnActionEvent event) {
@@ -77,10 +85,5 @@ public final class ScrollToSource extends DumbAwareToggleAction {
         if (content != null && content.getComponent() instanceof MypyToolWindowPanel) {
             ((MypyToolWindowPanel) content.getComponent()).setScrollToSource(selected);
         }
-    }
-
-    @Override
-    public @NotNull ActionUpdateThread getActionUpdateThread() {
-        return ActionUpdateThread.EDT;
     }
 }

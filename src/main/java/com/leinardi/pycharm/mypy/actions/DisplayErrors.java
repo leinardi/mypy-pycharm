@@ -12,6 +12,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Modifications:
+ * - 2024-10-03: Modified by Dominik Willner to fix ActionUpdateThread deprecation warnings.
  */
 
 package com.leinardi.pycharm.mypy.actions;
@@ -33,6 +36,11 @@ import static com.leinardi.pycharm.mypy.actions.ToolWindowAccess.toolWindow;
  * Action to toggle error display in tool window.
  */
 public class DisplayErrors extends DumbAwareToggleAction {
+
+    @Override
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.EDT;
+    }
 
     @Override
     public boolean isSelected(final @NotNull AnActionEvent event) {
@@ -57,10 +65,5 @@ public class DisplayErrors extends DumbAwareToggleAction {
             panel.setDisplayingErrors(selected);
             panel.filterDisplayedResults();
         });
-    }
-
-    @Override
-    public @NotNull ActionUpdateThread getActionUpdateThread() {
-        return ActionUpdateThread.EDT;
     }
 }
