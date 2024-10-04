@@ -19,7 +19,6 @@
 
 package com.leinardi.pycharm.mypy.actions;
 
-import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.leinardi.pycharm.mypy.toolwindow.MypyToolWindowPanel;
 import org.jetbrains.annotations.NotNull;
@@ -31,11 +30,6 @@ import static com.leinardi.pycharm.mypy.actions.ToolWindowAccess.toolWindow;
  * Action to expand all nodes in the results window.
  */
 public class ExpandAll extends BaseAction {
-
-    @Override
-    public @NotNull ActionUpdateThread getActionUpdateThread() {
-        return ActionUpdateThread.EDT;
-    }
 
     @Override
     public void actionPerformed(final @NotNull AnActionEvent event) {

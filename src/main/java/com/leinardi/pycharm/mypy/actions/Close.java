@@ -19,7 +19,6 @@
 
 package com.leinardi.pycharm.mypy.actions;
 
-import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import org.jetbrains.annotations.NotNull;
 
@@ -29,11 +28,6 @@ import static com.leinardi.pycharm.mypy.actions.ToolWindowAccess.toolWindow;
  * Action to close the tool window.
  */
 public class Close extends BaseAction {
-
-    @Override
-    public @NotNull ActionUpdateThread getActionUpdateThread() {
-        return ActionUpdateThread.EDT;
-    }
 
     @Override
     public void actionPerformed(final @NotNull AnActionEvent event) {

@@ -19,7 +19,6 @@
 
 package com.leinardi.pycharm.mypy.actions;
 
-import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.options.ShowSettingsUtil;
 import com.leinardi.pycharm.mypy.MypyConfigurable;
@@ -29,11 +28,6 @@ import org.jetbrains.annotations.NotNull;
  * Action to close the tool window.
  */
 public class Settings extends BaseAction {
-
-    @Override
-    public @NotNull ActionUpdateThread getActionUpdateThread() {
-        return ActionUpdateThread.EDT;
-    }
 
     @Override
     public void actionPerformed(final @NotNull AnActionEvent event) {
