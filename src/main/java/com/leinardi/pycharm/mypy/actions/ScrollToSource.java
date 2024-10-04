@@ -86,9 +86,4 @@ public final class ScrollToSource extends DumbAwareToggleAction {
             ((MypyToolWindowPanel) content.getComponent()).setScrollToSource(selected);
         }
     }
-
-    @Override
-    public @NotNull ActionUpdateThread getActionUpdateThread() {
-        return ActionUpdateThread.EDT;
-    }
 }

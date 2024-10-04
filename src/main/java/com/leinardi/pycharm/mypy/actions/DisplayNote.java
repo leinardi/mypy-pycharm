@@ -67,9 +67,4 @@ public class DisplayNote extends DumbAwareToggleAction {
             panel.filterDisplayedResults();
         });
     }
-
-    @Override
-    public @NotNull ActionUpdateThread getActionUpdateThread() {
-        return ActionUpdateThread.EDT;
-    }
 }

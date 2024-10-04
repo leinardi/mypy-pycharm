@@ -16,7 +16,6 @@
 
 package com.leinardi.pycharm.mypy.actions;
 
-import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.diagnostic.Logger;
@@ -77,11 +76,6 @@ public abstract class BaseAction extends DumbAwareAction {
         } catch (Throwable e) {
             LOG.warn("Action update failed", e);
         }
-    }
-
-    @Override
-    public @NotNull ActionUpdateThread getActionUpdateThread() {
-        return ActionUpdateThread.EDT;
     }
 
     protected void setProgressText(final ToolWindow toolWindow, final String progressTextKey) {

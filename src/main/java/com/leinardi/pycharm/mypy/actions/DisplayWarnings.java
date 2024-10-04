@@ -66,9 +66,4 @@ public class DisplayWarnings extends DumbAwareToggleAction {
             panel.filterDisplayedResults();
         });
     }
-
-    @Override
-    public @NotNull ActionUpdateThread getActionUpdateThread() {
-        return ActionUpdateThread.EDT;
-    }
 }
