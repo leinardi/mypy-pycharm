@@ -12,10 +12,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Modifications:
+ * - 2024-10-03: Modified by Dominik Willner to fix ActionUpdateThread deprecation warnings.
  */
 
 package com.leinardi.pycharm.mypy.actions;
 
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.diagnostic.Logger;
@@ -35,6 +39,11 @@ import java.util.List;
 public class ScanModifiedFiles extends BaseAction {
 
     private static final Logger LOG = Logger.getInstance(ScanModifiedFiles.class);
+
+    @Override
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.BGT;
+    }
 
     @Override
     public final void actionPerformed(final @NotNull AnActionEvent event) {
