@@ -12,10 +12,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Modifications:
+ * - 2024-10-03: Modified by Dominik Willner to fix ActionUpdateThread deprecation warnings.
  */
 
 package com.leinardi.pycharm.mypy.actions;
 
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.application.ReadAction;
@@ -32,6 +36,11 @@ import org.jetbrains.annotations.NotNull;
  * Action to execute a Mypy scan on the current project.
  */
 public class ScanProject extends BaseAction {
+
+    @Override
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.BGT;
+    }
 
     @Override
     public void actionPerformed(final @NotNull AnActionEvent event) {

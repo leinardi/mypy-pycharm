@@ -16,6 +16,7 @@
 
 package com.leinardi.pycharm.mypy.actions;
 
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.diagnostic.Logger;
@@ -41,6 +42,11 @@ import static java.util.Optional.ofNullable;
 public abstract class BaseAction extends DumbAwareAction {
 
     private static final Logger LOG = Logger.getInstance(BaseAction.class);
+
+    @Override
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.EDT;
+    }
 
     @Override
     public void update(final @NotNull AnActionEvent event) {
