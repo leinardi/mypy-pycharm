@@ -1,4 +1,4 @@
-**[0.16.3] 2024-10-04**
+**[0.16.3] 2024-10-05**
 
 - Fixed #120: Defined action update thread for actions (thanks @dw-0 for the help!)
 - New: Min IDEA version raised from PC-2022.1.4 to PC-2023.3.6
