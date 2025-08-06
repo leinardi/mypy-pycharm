@@ -1,6 +1,14 @@
+> ⚠️ **This plugin is no longer maintained.**  
+> A new and actively maintained version of the Mypy plugin is now available thanks to the work of [@szabope](https://github.com/szabope), who rewrote it entirely. While not a direct 1:1 replacement, the new plugin offers an improved and modernized experience for PyCharm users.
+>
+> 🔄 **New Plugin:** [Mypy - JetBrains Marketplace](https://plugins.jetbrains.com/plugin/25888-mypy)  
+> 🛠️ **Source Code:** [github.com/szabope/mypy-pycharm-plugin](https://github.com/szabope/mypy-pycharm-plugin)
+>
+> Thank you [@szabope](https://github.com/szabope) for taking over and breathing new life into this project!
+
+
 # mypy-pycharm
 [![GitHub (pre-)release](https://img.shields.io/github/release/leinardi/mypy-pycharm/all.svg?style=plastic)](https://github.com/leinardi/mypy-pycharm/releases)
-[![Travis](https://img.shields.io/travis/leinardi/mypy-pycharm/master.svg?style=plastic)](https://travis-ci.org/leinardi/mypy-pycharm)
 [![GitHub license](https://img.shields.io/github/license/leinardi/mypy-pycharm.svg?style=plastic)](https://github.com/leinardi/mypy-pycharm/blob/master/LICENSE) 
 [![Stars](https://img.shields.io/github/stars/leinardi/mypy-pycharm.svg?style=social&label=Stars)](https://github.com/leinardi/mypy-pycharm/stargazers) 
 
